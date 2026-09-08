@@ -32,7 +32,7 @@ final class Configuration implements ConfigurationInterface
                     ->info('Names of the framework rate limiters combined for every disclosure. A request is accepted only when every limiter accepts it (for example a burst window plus a daily quota).')
                     ->beforeNormalization()
                         ->ifString()
-                        ->then(static fn (string $value): array => [$value])
+                        ->then(static fn(string $value): array => [$value])
                     ->end()
                     ->defaultValue(['ux_disclose'])
                     ->scalarPrototype()->end()

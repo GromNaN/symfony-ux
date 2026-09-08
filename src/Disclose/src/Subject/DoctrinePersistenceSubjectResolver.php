@@ -31,9 +31,7 @@ use Symfony\UX\Disclose\Subject\Exception\UnmanagedSubjectClassException;
  */
 final class DoctrinePersistenceSubjectResolver implements SubjectResolverInterface
 {
-    public function __construct(private readonly ?ManagerRegistry $doctrineRegistry = null)
-    {
-    }
+    public function __construct(private readonly ?ManagerRegistry $doctrineRegistry = null) {}
 
     public function supports(DiscloseContext $context): bool
     {

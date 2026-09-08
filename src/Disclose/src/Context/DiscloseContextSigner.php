@@ -24,9 +24,7 @@ use Symfony\UX\Disclose\Checksum\ChecksumCalculator;
  */
 final class DiscloseContextSigner
 {
-    public function __construct(private readonly ChecksumCalculator $checksumCalculator)
-    {
-    }
+    public function __construct(private readonly ChecksumCalculator $checksumCalculator) {}
 
     /**
      * @return array{d: string, h: string}

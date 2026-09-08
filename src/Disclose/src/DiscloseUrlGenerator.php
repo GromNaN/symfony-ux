@@ -27,8 +27,7 @@ final class DiscloseUrlGenerator
     public function __construct(
         private readonly UrlGeneratorInterface $urlGenerator,
         private readonly DiscloseContextSigner $contextSigner,
-    ) {
-    }
+    ) {}
 
     public function generate(DiscloseContext $context, int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): string
     {

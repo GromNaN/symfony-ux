@@ -26,9 +26,7 @@ final class DiscloseContextFactory
     /**
      * @param iterable<ContextProviderInterface> $providers
      */
-    public function __construct(private readonly iterable $providers = [])
-    {
-    }
+    public function __construct(private readonly iterable $providers = []) {}
 
     public function create(string $class, string|int|array $id, ?string $field = null, array $extra = []): DiscloseContext
     {

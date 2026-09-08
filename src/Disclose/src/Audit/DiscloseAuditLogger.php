@@ -12,10 +12,11 @@
 namespace Symfony\UX\Disclose\Audit;
 
 use Psr\Log\LoggerInterface;
+use Psr\Log\LogLevel;
 use Symfony\UX\Disclose\Context\DiscloseContext;
 
 /**
- * Writes one structured record per disclosure attempt and outcome.
+ * Writes one structured record per disclosure outcome.
  *
  * @author Jérôme Tamarelle <jerome@tamarelle.net>
  *
@@ -23,13 +24,11 @@ use Symfony\UX\Disclose\Context\DiscloseContext;
  */
 final class DiscloseAuditLogger
 {
-    public function __construct(private readonly LoggerInterface $logger)
-    {
-    }
+    public function __construct(private readonly LoggerInterface $logger) {}
 
     public function log(DiscloseContext $context, DiscloseStatus $status, string $identity, array $extra = []): void
     {
-        $this->logger->log($status->logLevel(), \sprintf('Protected value disclosure: %s', $status->value), [
+        $this->logger->log($this->logLevel($status), \sprintf('Protected value disclosure: %s', $status->value), [
             'identity' => $identity,
             'context' => [
                 'class' => $context->class,
@@ -38,5 +37,13 @@ final class DiscloseAuditLogger
             ],
             ...$extra,
         ]);
+    }
+
+    private function logLevel(DiscloseStatus $status): string
+    {
+        return match ($status) {
+            DiscloseStatus::Attempt, DiscloseStatus::Success => LogLevel::INFO,
+            DiscloseStatus::AuthDenied, DiscloseStatus::RateLimited => LogLevel::WARNING,
+        };
     }
 }

@@ -98,7 +98,7 @@ final class DiscloseExtension extends ConfigurableExtension implements PrependEx
 
         $rateLimiterFactories = [];
         foreach ($config['rate_limiter'] as $name) {
-            $rateLimiterFactories[] = new Reference('limiter.'.$name, ContainerInterface::NULL_ON_INVALID_REFERENCE);
+            $rateLimiterFactories[] = new Reference('limiter.' . $name, ContainerInterface::NULL_ON_INVALID_REFERENCE);
         }
 
         $rateLimiterArguments = [
@@ -182,7 +182,7 @@ final class DiscloseExtension extends ConfigurableExtension implements PrependEx
         $container->prependExtensionConfig('framework', [
             'asset_mapper' => [
                 'paths' => [
-                    __DIR__.'/../../assets/dist' => '@symfony/ux-disclose',
+                    __DIR__ . '/../../assets/dist' => '@symfony/ux-disclose',
                 ],
             ],
         ]);
@@ -200,6 +200,6 @@ final class DiscloseExtension extends ConfigurableExtension implements PrependEx
             return false;
         }
 
-        return is_file($bundlesMetadata['FrameworkBundle']['path'].'/Resources/config/asset_mapper.php');
+        return is_file($bundlesMetadata['FrameworkBundle']['path'] . '/Resources/config/asset_mapper.php');
     }
 }

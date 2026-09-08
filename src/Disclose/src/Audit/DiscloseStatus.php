@@ -11,10 +11,9 @@
 
 namespace Symfony\UX\Disclose\Audit;
 
-use Psr\Log\LogLevel;
-
 /**
- * Outcome of a disclosure request, used for the audit trail.
+ * Outcome of a disclosure request, shared by the audit trail and the
+ * disclosure events.
  *
  * @author Jérôme Tamarelle <jerome@tamarelle.net>
  */
@@ -24,15 +23,4 @@ enum DiscloseStatus: string
     case Success = 'success';
     case AuthDenied = 'auth_denied';
     case RateLimited = 'rate_limited';
-
-    /**
-     * PSR-3 level name for the audit record.
-     */
-    public function logLevel(): string
-    {
-        return match ($this) {
-            self::Attempt, self::Success => LogLevel::INFO,
-            self::AuthDenied, self::RateLimited => LogLevel::WARNING,
-        };
-    }
 }

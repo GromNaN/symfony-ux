@@ -44,8 +44,7 @@ final class DiscloseController
         private readonly DiscloseAuditLogger $auditLogger,
         private readonly EventDispatcherInterface $eventDispatcher,
         private readonly ?Environment $twig = null,
-    ) {
-    }
+    ) {}
 
     public function __invoke(Request $request): JsonResponse
     {
@@ -66,7 +65,7 @@ final class DiscloseController
 
         if (!$discloser->isGranted($subject)) {
             $this->auditLogger->log($context, DiscloseStatus::AuthDenied, $identity);
-            $this->eventDispatcher->dispatch(new DiscloseEvent($context, $subject, status: DiscloseStatus::AuthDenied), DiscloseEvent::REJECTED);
+            $this->eventDispatcher->dispatch(new DiscloseEvent($context, $subject, status: DiscloseStatus::AuthDenied), 'disclose.auth_denied');
 
             return $this->fail(403, 'access_denied', 'DISCLOSE_DENIED');
         }
@@ -76,7 +75,7 @@ final class DiscloseController
             $retryAfter = $rateLimit->getRetryAfter();
             $seconds = $retryAfter ? max(0, $retryAfter->getTimestamp() - time()) : 1;
             $this->auditLogger->log($context, DiscloseStatus::RateLimited, $identity, ['retry_after' => $seconds]);
-            $this->eventDispatcher->dispatch(new DiscloseEvent($context, $subject, status: DiscloseStatus::RateLimited), DiscloseEvent::REJECTED);
+            $this->eventDispatcher->dispatch(new DiscloseEvent($context, $subject, status: DiscloseStatus::RateLimited), 'disclose.rate_limited');
 
             $response = new JsonResponse([
                 'error' => 'rate_limited',
@@ -89,7 +88,7 @@ final class DiscloseController
         }
 
         $this->auditLogger->log($context, DiscloseStatus::Attempt, $identity);
-        $this->eventDispatcher->dispatch(new DiscloseEvent($context, $subject), DiscloseEvent::ATTEMPT);
+        $this->eventDispatcher->dispatch(new DiscloseEvent($context, $subject, status: DiscloseStatus::Attempt), 'disclose.attempt');
 
         $template = $context->get('template');
         if (\is_string($template) && null !== $this->twig) {
@@ -110,7 +109,7 @@ final class DiscloseController
         }
 
         $this->auditLogger->log($context, DiscloseStatus::Success, $identity);
-        $this->eventDispatcher->dispatch(new DiscloseEvent($context, $subject), DiscloseEvent::SUCCESS);
+        $this->eventDispatcher->dispatch(new DiscloseEvent($context, $subject, status: DiscloseStatus::Success), 'disclose.success');
 
         return $this->withNoStore(new JsonResponse($data));
     }

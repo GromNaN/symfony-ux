@@ -17,24 +17,19 @@ use Symfony\UX\Disclose\Context\DiscloseContext;
 
 /**
  * Dispatched around a disclosure so applications can plug their own logic
- * (for example a dedicated audit storage).
+ * (for example a dedicated audit storage). The event name identifies the
+ * step (attempt, success, auth denied or rate limited).
+ *
+ * The event never carries the disclosed value: listeners must not be able to
+ * observe the sensitive data.
  *
  * @author Jérôme Tamarelle <jerome@tamarelle.net>
  */
 final class DiscloseEvent extends Event
 {
-    public const ATTEMPT = 'disclose.attempt';
-    public const SUCCESS = 'disclose.success';
-    public const REJECTED = 'disclose.rejected';
-
-    /**
-     * The event never carries the disclosed value: listeners must not be able
-     * to observe the sensitive data.
-     */
     public function __construct(
         public readonly DiscloseContext $context,
         public readonly ?object $subject = null,
-        public readonly ?DiscloseStatus $status = null,
-    ) {
-    }
+        public readonly DiscloseStatus $status,
+    ) {}
 }

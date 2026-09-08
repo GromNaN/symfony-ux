@@ -14,9 +14,7 @@ namespace Symfony\UX\Disclose\Checksum;
 /** @internal */
 class ChecksumCalculator
 {
-    public function __construct(private readonly string $secret)
-    {
-    }
+    public function __construct(private readonly string $secret) {}
 
     public function calculateForArray(array $data): string
     {

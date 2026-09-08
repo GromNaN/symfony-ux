@@ -21,6 +21,4 @@ namespace Symfony\UX\Disclose\Subject\Exception;
  *
  * @internal
  */
-final class UnmanagedSubjectClassException extends \LogicException
-{
-}
+final class UnmanagedSubjectClassException extends \LogicException {}

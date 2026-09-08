@@ -40,8 +40,7 @@ final class DiscloseRateLimiter
         private readonly ?Security $security = null,
         private readonly array $rateLimiterFactories = [],
         private readonly ?DiscloseRateLimitSubjectFactoryInterface $subjectFactory = null,
-    ) {
-    }
+    ) {}
 
     /**
      * Consumes one token. Returns null when no rate limiter is configured.
@@ -83,9 +82,9 @@ final class DiscloseRateLimiter
         $user = $this->security?->getUser();
 
         if ($user instanceof UserInterface) {
-            return 'user:'.$user->getUserIdentifier();
+            return 'user:' . $user->getUserIdentifier();
         }
 
-        return 'ip:'.$request->getClientIp();
+        return 'ip:' . $request->getClientIp();
     }
 }

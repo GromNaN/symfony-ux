@@ -30,9 +30,7 @@ final class DoctrinePersistenceContextProvider implements ContextProviderInterfa
     /**
      * @param list<ManagerRegistry|null> $managerRegistries
      */
-    public function __construct(private readonly array $managerRegistries = [])
-    {
-    }
+    public function __construct(private readonly array $managerRegistries = []) {}
 
     public function create(object $subject, ?string $field = null, array $extra = []): ?DiscloseContext
     {

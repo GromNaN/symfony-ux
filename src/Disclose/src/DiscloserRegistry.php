@@ -23,9 +23,7 @@ final class DiscloserRegistry
     /**
      * @param iterable<DiscloserInterface> $disclosers
      */
-    public function __construct(private readonly iterable $disclosers)
-    {
-    }
+    public function __construct(private readonly iterable $disclosers) {}
 
     public function getDiscloser(object $subject): DiscloserInterface
     {

@@ -275,7 +275,8 @@ to detect bulk harvesting:
         logger: monolog.logger.audit
 
 Applications can also subscribe to the ``disclose.attempt``, ``disclose.success``
-and ``disclose.rejected`` events for a custom audit store.
+and ``disclose.auth_denied`` and ``disclose.rate_limited`` events for a custom
+audit store.
 
 Security considerations
 -----------------------

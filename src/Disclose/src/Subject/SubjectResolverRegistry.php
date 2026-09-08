@@ -26,9 +26,7 @@ final class SubjectResolverRegistry
     /**
      * @param iterable<SubjectResolverInterface> $resolvers
      */
-    public function __construct(private readonly iterable $resolvers)
-    {
-    }
+    public function __construct(private readonly iterable $resolvers) {}
 
     /**
      * @throws UnmanagedSubjectClassException when no resolver supports the context

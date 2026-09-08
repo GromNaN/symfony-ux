@@ -30,8 +30,7 @@ final class DiscloseContext
         public readonly string|int|array $id,
         public readonly ?string $field,
         private readonly array $extra,
-    ) {
-    }
+    ) {}
 
     public static function create(string $class, string|int|array $id, ?string $field = null, array $extra = []): self
     {

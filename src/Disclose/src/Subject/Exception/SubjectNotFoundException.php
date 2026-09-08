@@ -18,6 +18,4 @@ namespace Symfony\UX\Disclose\Subject\Exception;
  *
  * @internal
  */
-final class SubjectNotFoundException extends \RuntimeException
-{
-}
+final class SubjectNotFoundException extends \RuntimeException {}
