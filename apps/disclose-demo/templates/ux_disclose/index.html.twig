@@ -1,0 +1,60 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <style>
+        .client-list { min-height: 24rem; }
+        .client-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.5rem 0.75rem;
+            border-top: 1px solid color-mix(in srgb, currentColor 14%, transparent);
+        }
+        .client-name { flex: 1; font-weight: 600; }
+        .c-protected { display: inline-flex; align-items: center; gap: 0.75rem; }
+        .c-protected .c-eye { order: 99; margin-left: auto; }
+        .c-eye {
+            border: 0;
+            background: transparent;
+            color: inherit;
+            padding: 0.2rem;
+            line-height: 0;
+            cursor: pointer;
+            opacity: 0.75;
+            border-radius: 0.25rem;
+        }
+        .c-eye:hover, .c-eye:focus-visible {
+            opacity: 1;
+            background: color-mix(in srgb, currentColor 12%, transparent);
+        }
+        .c-eye[hidden] { display: none; }
+        .c-masked { letter-spacing: 0.08em; opacity: 0.7; user-select: none; }
+        .c-value { font-variant-numeric: tabular-nums; }
+        .c-sep { opacity: 0.5; }
+        .client-pagination {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+        .client-page-indicator { margin: 0 0.25rem; opacity: 0.8; }
+    </style>
+
+    <div class="container my-5">
+        <h1>Clients</h1>
+        <p class="text-muted">
+            Emails and phone numbers are masked. Click the eye at the end of a row
+            to reveal the whole row, through the rate-limited, audited
+            <code>/disclose/ux/disclose</code> endpoint.
+        </p>
+
+        <turbo-frame id="clients_frame">
+            <div class="client-list">
+                {% include 'ux_disclose/_clients.html.twig' %}
+            </div>
+            {% include 'ux_disclose/_pagination.html.twig' %}
+        </turbo-frame>
+
+        <p class="mt-4"><a href="{{ path('admin') }}">Open the EasyAdmin CRUD (HTTP Basic: admin/admin)</a></p>
+    </div>
+{% endblock %}

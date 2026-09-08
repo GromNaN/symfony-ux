@@ -1,0 +1,17 @@
+{% if pages > 1 %}
+    <nav class="client-pagination" aria-label="Clients">
+        <a
+            data-turbo-frame="clients_frame"
+            class="btn btn-sm btn-outline-secondary{% if page <= 1 %} disabled{% endif %}"
+            href="{{ path('home', { page: page - 1 }) }}"
+            {% if page <= 1 %}aria-disabled="true" tabindex="-1"{% endif %}
+        >&lsaquo; Previous</a>
+        <span class="client-page-indicator">Page {{ page }} / {{ pages }}</span>
+        <a
+            data-turbo-frame="clients_frame"
+            class="btn btn-sm btn-outline-secondary{% if page >= pages %} disabled{% endif %}"
+            href="{{ path('home', { page: page + 1 }) }}"
+            {% if page >= pages %}aria-disabled="true" tabindex="-1"{% endif %}
+        >Next &rsaquo;</a>
+    </nav>
+{% endif %}

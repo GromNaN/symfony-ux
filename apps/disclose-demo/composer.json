@@ -21,7 +21,9 @@
         "symfony/twig-bundle": "^7.4",
         "symfony/ux-disclose": "@dev",
         "symfony/ux-twig-component": "^2.33.0",
-        "symfony/yaml": "^7.4"
+        "symfony/yaml": "^7.4",
+        "symfony/ux-turbo": "^2.13|^3",
+        "symfony/ux-icons": "^2.14|^3"
     },
     "autoload": {
         "psr-4": {

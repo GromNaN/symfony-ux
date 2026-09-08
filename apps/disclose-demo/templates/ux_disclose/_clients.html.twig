@@ -1,0 +1,37 @@
+{% for client in clients %}
+    <div class="client-row">
+        <span class="c-name">{{ client.name }}</span>
+
+        <twig:ux:disclose :context="client" render="ux_disclose/_client_cleared.html.twig" class="c-protected">
+            {% block button %}
+                <button
+                    type="button"
+                    class="c-eye"
+                    data-disclose-target="button"
+                    data-action="disclose#reveal"
+                    aria-label="Reveal the whole row"
+                    title="Reveal the whole row"
+                >
+                    <twig:ux:icon name="bootstrap:eye-slash" class="c-eye-icon" aria-hidden="true" />
+                </button>
+            {% endblock %}
+
+            {% block content %}
+                <span class="c-masked" data-disclose-target="value">••••••</span>
+                <button
+                    type="button"
+                    class="c-eye"
+                    data-disclose-target="hideButton"
+                    data-action="disclose#hide"
+                    aria-label="Hide this row"
+                    title="Hide this row"
+                    hidden
+                >
+                    <twig:ux:icon name="bootstrap:eye" class="c-eye-icon" aria-hidden="true" />
+                </button>
+            {% endblock %}
+        </twig:ux:disclose>
+    </div>
+{% else %}
+    <p class="text-muted">No clients yet. Run <code>php bin/console app:seed-clients</code>.</p>
+{% endfor %}

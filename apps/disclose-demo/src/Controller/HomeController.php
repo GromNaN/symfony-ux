@@ -11,11 +11,22 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class HomeController extends AbstractController
 {
+    private const int PAGE_SIZE = 20;
+
     #[Route('/', name: 'home')]
     public function index(Request $request, ClientRepository $clients): Response
     {
-        $response = $this->render('home/index.html.twig', [
-            'clients' => $clients->findAll(),
+        $page = max(1, (int) $request->query->get('page', 1));
+        $total = $clients->count([]);
+        $pages = max(1, (int) ceil($total / self::PAGE_SIZE));
+        $page = min($page, $pages);
+
+        $rows = $clients->findBy([], ['id' => 'ASC'], self::PAGE_SIZE, ($page - 1) * self::PAGE_SIZE);
+
+        $response = $this->render('ux_disclose/index.html.twig', [
+            'clients' => $rows,
+            'page' => $page,
+            'pages' => $pages,
         ]);
 
         // The disclosure rate limiter keys on this cookie, so each visitor
