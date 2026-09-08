@@ -52,7 +52,9 @@ declare class export_default extends Controller {
   readonly hasErrorTarget: boolean;
   private inFlight;
   private cachedValue;
+  private originalButtonHtml;
   connect(): void;
+  private resetTrigger;
   reveal(): Promise<void>;
   hide(): void;
   private displayValue;

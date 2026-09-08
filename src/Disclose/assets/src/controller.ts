@@ -48,12 +48,26 @@ export default class extends Controller {
 
     private cachedValue: string | null = null;
 
+    /**
+     * The trigger marked up by the server (the mask or a custom content such
+     * as an icon), restored instead of forcing the mask text.
+     */
+    private originalButtonHtml: string | null = null;
+
     connect() {
         if (this.hasButtonTarget) {
-            this.buttonTarget.disabled = false;
-            this.buttonTarget.textContent = this.maskValue;
+            this.originalButtonHtml = this.buttonTarget.innerHTML;
+            this.resetTrigger();
         }
         this.clearError();
+    }
+
+    private resetTrigger() {
+        if (this.hasButtonTarget) {
+            this.buttonTarget.disabled = false;
+            this.buttonTarget.setAttribute('aria-busy', 'false');
+            this.buttonTarget.innerHTML = this.originalButtonHtml ?? this.maskValue;
+        }
     }
 
     async reveal() {
@@ -108,9 +122,7 @@ export default class extends Controller {
         } finally {
             this.inFlight = false;
             if (this.hasButtonTarget && !this.buttonTarget.hidden) {
-                this.buttonTarget.disabled = false;
-                this.buttonTarget.setAttribute('aria-busy', 'false');
-                this.buttonTarget.textContent = this.maskValue;
+                this.resetTrigger();
             }
         }
     }
@@ -127,9 +139,7 @@ export default class extends Controller {
         }
         if (this.hasButtonTarget) {
             this.buttonTarget.hidden = false;
-            this.buttonTarget.disabled = false;
-            this.buttonTarget.setAttribute('aria-busy', 'false');
-            this.buttonTarget.textContent = this.maskValue;
+            this.resetTrigger();
         }
         this.clearError();
         this.dispatch('hidden');

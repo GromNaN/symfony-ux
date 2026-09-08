@@ -4,13 +4,21 @@ var _Class = class extends Controller {
 		super(..._args);
 		this.inFlight = false;
 		this.cachedValue = null;
+		this.originalButtonHtml = null;
 	}
 	connect() {
 		if (this.hasButtonTarget) {
-			this.buttonTarget.disabled = false;
-			this.buttonTarget.textContent = this.maskValue;
+			this.originalButtonHtml = this.buttonTarget.innerHTML;
+			this.resetTrigger();
 		}
 		this.clearError();
+	}
+	resetTrigger() {
+		if (this.hasButtonTarget) {
+			this.buttonTarget.disabled = false;
+			this.buttonTarget.setAttribute("aria-busy", "false");
+			this.buttonTarget.innerHTML = this.originalButtonHtml ?? this.maskValue;
+		}
 	}
 	async reveal() {
 		if (this.inFlight) return;
@@ -49,11 +57,7 @@ var _Class = class extends Controller {
 			this.dispatch("error", { detail: { error: String(error) } });
 		} finally {
 			this.inFlight = false;
-			if (this.hasButtonTarget && !this.buttonTarget.hidden) {
-				this.buttonTarget.disabled = false;
-				this.buttonTarget.setAttribute("aria-busy", "false");
-				this.buttonTarget.textContent = this.maskValue;
-			}
+			if (this.hasButtonTarget && !this.buttonTarget.hidden) this.resetTrigger();
 		}
 	}
 	hide() {
@@ -62,9 +66,7 @@ var _Class = class extends Controller {
 		if (this.hasHideButtonTarget) this.hideButtonTarget.hidden = true;
 		if (this.hasButtonTarget) {
 			this.buttonTarget.hidden = false;
-			this.buttonTarget.disabled = false;
-			this.buttonTarget.setAttribute("aria-busy", "false");
-			this.buttonTarget.textContent = this.maskValue;
+			this.resetTrigger();
 		}
 		this.clearError();
 		this.dispatch("hidden");

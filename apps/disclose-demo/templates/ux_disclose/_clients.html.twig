@@ -12,7 +12,7 @@
                     aria-label="Reveal the whole row"
                     title="Reveal the whole row"
                 >
-                    <twig:ux:icon name="bootstrap:eye-slash" class="c-eye-icon" aria-hidden="true" />
+                    {{ ux_icon('bi:eye-slash', { class: 'c-eye-icon', 'aria-hidden': 'true' }) }}
                 </button>
             {% endblock %}
 
@@ -27,7 +27,7 @@
                     title="Hide this row"
                     hidden
                 >
-                    <twig:ux:icon name="bootstrap:eye" class="c-eye-icon" aria-hidden="true" />
+                    {{ ux_icon('bi:eye', { class: 'c-eye-icon', 'aria-hidden': 'true' }) }}
                 </button>
             {% endblock %}
         </twig:ux:disclose>

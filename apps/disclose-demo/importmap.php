@@ -28,4 +28,7 @@ return [
     '@hotwired/turbo' => [
         'version' => '8.0.23',
     ],
+    '@iconify-json/bi' => [
+        'version' => '1.2.7',
+    ],
 ];
