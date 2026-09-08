@@ -24,6 +24,7 @@ use Symfony\UX\Disclose\Audit\DiscloseAuditLogger;
 use Symfony\UX\Disclose\Checksum\ChecksumCalculator;
 use Symfony\UX\Disclose\Context\DiscloseContextFactory;
 use Symfony\UX\Disclose\Context\DiscloseContextSigner;
+use Symfony\UX\Disclose\Context\DoctrinePersistenceContextProvider;
 use Symfony\UX\Disclose\Controller\DiscloseController;
 use Symfony\UX\Disclose\DiscloserRegistry;
 use Symfony\UX\Disclose\DiscloseUrlGenerator;
@@ -57,11 +58,23 @@ final class DiscloseExtension extends ConfigurableExtension implements PrependEx
         ;
 
         $container->register('ux.disclose.context_factory', DiscloseContextFactory::class)
-            ->setArguments([
-                new Reference('doctrine', ContainerInterface::NULL_ON_INVALID_REFERENCE),
-                new Reference('doctrine_mongodb', ContainerInterface::NULL_ON_INVALID_REFERENCE),
-            ])
+            ->setArguments([new TaggedIteratorArgument('ux.disclose.context_provider')])
         ;
+
+        $managerRegistries = [];
+        if (ContainerBuilder::willBeAvailable('doctrine/orm', EntityManagerInterface::class, ['doctrine/doctrine-bundle'])) {
+            $managerRegistries[] = new Reference('doctrine', ContainerInterface::NULL_ON_INVALID_REFERENCE);
+        }
+        if (ContainerBuilder::willBeAvailable('doctrine/mongodb-odm', DocumentManager::class, ['doctrine/mongodb-odm-bundle'])) {
+            $managerRegistries[] = new Reference('doctrine_mongodb', ContainerInterface::NULL_ON_INVALID_REFERENCE);
+        }
+
+        if ($managerRegistries) {
+            $container->register('ux.disclose.doctrine_persistence_context_provider', DoctrinePersistenceContextProvider::class)
+                ->setArguments([$managerRegistries])
+                ->addTag('ux.disclose.context_provider')
+            ;
+        }
 
         $container->register('ux.disclose.subject_resolver_registry', SubjectResolverRegistry::class)
             ->setArguments([new TaggedIteratorArgument('ux.disclose.subject_resolver')])

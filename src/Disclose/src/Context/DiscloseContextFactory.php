@@ -11,13 +11,11 @@
 
 namespace Symfony\UX\Disclose\Context;
 
-use Doctrine\Persistence\ManagerRegistry;
-
 /**
- * Builds a disclose context, from scratch or out of an object, at render time.
+ * Builds a disclose context, from scratch or out of an object at render time.
  *
- * The object path only works when a Doctrine manager knows the class: entities,
- * ODM documents, or any class managed by a registered object manager.
+ * Context providers are data source agnostic: they resolve an object into a
+ * context, so the factory never depends on a specific persistence layer.
  *
  * @author Jérôme Tamarelle <jerome@tamarelle.net>
  *
@@ -25,10 +23,11 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 final class DiscloseContextFactory
 {
-    public function __construct(
-        private readonly ?ManagerRegistry $doctrineRegistry = null,
-        private readonly ?ManagerRegistry $doctrineMongodbRegistry = null,
-    ) {
+    /**
+     * @param iterable<ContextProviderInterface> $providers
+     */
+    public function __construct(private readonly iterable $providers = [])
+    {
     }
 
     public function create(string $class, string|int|array $id, ?string $field = null, array $extra = []): DiscloseContext
@@ -38,22 +37,12 @@ final class DiscloseContextFactory
 
     public function createFromObject(object $subject, ?string $field = null, array $extra = []): DiscloseContext
     {
-        foreach ([$this->doctrineRegistry, $this->doctrineMongodbRegistry] as $registry) {
-            if (null === $registry) {
-                continue;
+        foreach ($this->providers as $provider) {
+            if (null !== $context = $provider->create($subject, $field, $extra)) {
+                return $context;
             }
-
-            $objectManager = $registry->getManagerForClass($subject::class);
-            if (null === $objectManager) {
-                continue;
-            }
-
-            $ids = (array) $objectManager->getClassMetadata($subject::class)->getIdentifierValues($subject);
-            $id = 1 === \count($ids) ? reset($ids) : $ids;
-
-            return DiscloseContext::create($subject::class, $id, $field, $extra);
         }
 
-        throw new \LogicException(\sprintf('Cannot build a disclose context from the object "%s". Pass an explicit context or register a subject resolver data source.', $subject::class));
+        throw new \LogicException(\sprintf('Cannot build a disclose context from the object "%s". Register a disclose context provider or pass an explicit disclose context.', $subject::class));
     }
 }
