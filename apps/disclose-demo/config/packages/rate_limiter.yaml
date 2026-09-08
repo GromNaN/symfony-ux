@@ -1,9 +1,21 @@
+services:
+    # Persist the disclosure quotas in the database, so a server restart never
+    # resets a rate limit (the table is created on first save).
+    app.cache.rate_limiter:
+        class: Symfony\Component\Cache\Adapter\DoctrineDbalAdapter
+        arguments:
+            - '@doctrine.dbal.default_connection'
+            # The cache namespace may not contain underscores.
+            - 'ux-disclose'
+            - 0
+
 framework:
     rate_limiter:
         ux_disclose:
             policy: fixed_window
             limit: 5
             interval: '1 minute'
+            cache_pool: app.cache.rate_limiter
             # Serializes concurrent consume() calls through a DBAL lock store,
             # so a burst cannot race past the quota (table auto-created).
             lock_factory: 'app.lock.factory'
