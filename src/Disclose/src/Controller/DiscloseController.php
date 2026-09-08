@@ -65,7 +65,7 @@ final class DiscloseController
 
         if (!$discloser->isGranted($subject)) {
             $this->auditLogger->log($context, DiscloseStatus::AuthDenied, $identity);
-            $this->eventDispatcher->dispatch(new DiscloseEvent($context, $subject, status: DiscloseStatus::AuthDenied), 'disclose.auth_denied');
+            $this->eventDispatcher->dispatch(new DiscloseEvent($context, $subject, status: DiscloseStatus::AuthDenied), DiscloseEvent::AUTH_DENIED);
 
             return $this->fail(403, 'access_denied', 'DISCLOSE_DENIED');
         }
@@ -75,7 +75,7 @@ final class DiscloseController
             $retryAfter = $rateLimit->getRetryAfter();
             $seconds = $retryAfter ? max(0, $retryAfter->getTimestamp() - time()) : 1;
             $this->auditLogger->log($context, DiscloseStatus::RateLimited, $identity, ['retry_after' => $seconds]);
-            $this->eventDispatcher->dispatch(new DiscloseEvent($context, $subject, status: DiscloseStatus::RateLimited), 'disclose.rate_limited');
+            $this->eventDispatcher->dispatch(new DiscloseEvent($context, $subject, status: DiscloseStatus::RateLimited), DiscloseEvent::RATE_LIMITED);
 
             $response = new JsonResponse([
                 'error' => 'rate_limited',
@@ -88,7 +88,7 @@ final class DiscloseController
         }
 
         $this->auditLogger->log($context, DiscloseStatus::Attempt, $identity);
-        $this->eventDispatcher->dispatch(new DiscloseEvent($context, $subject, status: DiscloseStatus::Attempt), 'disclose.attempt');
+        $this->eventDispatcher->dispatch(new DiscloseEvent($context, $subject, status: DiscloseStatus::Attempt), DiscloseEvent::ATTEMPT);
 
         $template = $context->get('template');
         if (\is_string($template) && null !== $this->twig) {
@@ -109,7 +109,7 @@ final class DiscloseController
         }
 
         $this->auditLogger->log($context, DiscloseStatus::Success, $identity);
-        $this->eventDispatcher->dispatch(new DiscloseEvent($context, $subject, status: DiscloseStatus::Success), 'disclose.success');
+        $this->eventDispatcher->dispatch(new DiscloseEvent($context, $subject, status: DiscloseStatus::Success), DiscloseEvent::SUCCESS);
 
         return $this->withNoStore(new JsonResponse($data));
     }

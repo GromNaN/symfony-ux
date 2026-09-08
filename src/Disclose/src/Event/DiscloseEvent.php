@@ -27,6 +27,11 @@ use Symfony\UX\Disclose\Context\DiscloseContext;
  */
 final class DiscloseEvent extends Event
 {
+    public const ATTEMPT = 'disclose.attempt';
+    public const SUCCESS = 'disclose.success';
+    public const AUTH_DENIED = 'disclose.auth_denied';
+    public const RATE_LIMITED = 'disclose.rate_limited';
+
     public function __construct(
         public readonly DiscloseContext $context,
         public readonly ?object $subject = null,
