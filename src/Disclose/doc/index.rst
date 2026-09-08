@@ -96,6 +96,19 @@ subject and any `vars` you pass, and the controller injects the resulting HTML::
 
     <twig:ux:disclose :context="client" :render="'admin/client/details.html.twig'" :vars="{ title: 'Profile' }" />
 
+To keep the revealed markup in the same template as the component, point
+``render`` at that template and name a ``block`` of it::
+
+    <twig:ux:disclose :context="client" render="admin/client/index.html.twig" block="client_details" />
+
+    {# in admin/client/index.html.twig #}
+    {% block client_details %}
+        <tr>
+            <td>{{ subject.email }}</td>
+            <td>{{ subject.phone }}</td>
+        </tr>
+    {% endblock %}
+
 The reveal template receives ``subject`` (the resolved object) and ``context``
 (the signed context), exactly as if it were a native Twig block::
 

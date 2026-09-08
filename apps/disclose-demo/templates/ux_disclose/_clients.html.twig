@@ -2,7 +2,7 @@
     <div class="client-row">
         <span class="c-name">{{ client.name }}</span>
 
-        <twig:ux:disclose :context="client" render="ux_disclose/_client_cleared.html.twig" class="c-protected">
+        <twig:ux:disclose :context="client" render="ux_disclose/_clients.html.twig" block="client_cleared" class="c-protected">
             {% block button %}
                 <button
                     type="button"
@@ -35,3 +35,13 @@
 {% else %}
     <p class="text-muted">No clients yet. Run <code>php bin/console app:seed-clients</code>.</p>
 {% endfor %}
+
+{# Revealed server-side on click, rendered by the disclose endpoint with the
+   "subject" and "context" variables. Dormant when this template is included. #}
+{% block client_cleared %}
+    {% if subject is defined %}
+        <span class="c-value">{{ subject.email }}</span>
+        <span class="c-sep" aria-hidden="true">·</span>
+        <span class="c-value">{{ subject.phone }}</span>
+    {% endif %}
+{% endblock %}

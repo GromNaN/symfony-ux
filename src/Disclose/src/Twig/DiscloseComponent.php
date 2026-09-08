@@ -55,6 +55,13 @@ final class DiscloseComponent
     public ?string $render = null;
 
     /**
+     * Name of a block of the "render" template to render at disclosure time,
+     * so the revealed markup can live in the same template as the component
+     * instead of a dedicated file. The block receives "subject" and "context".
+     */
+    public ?string $block = null;
+
+    /**
      * Extra variables passed to the "render" template.
      *
      * @var array<string, mixed>
@@ -119,6 +126,7 @@ final class DiscloseComponent
         $extra = $context->getExtra();
         if (null !== $this->render) {
             $extra['template'] = $this->render;
+            $extra['block'] = $this->block;
             $extra['vars'] = $this->vars;
         }
         if ($this->payload) {

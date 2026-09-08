@@ -93,10 +93,16 @@ final class DiscloseController
 
         $template = $context->get('template');
         if (\is_string($template) && null !== $this->twig) {
-            $revealed = $this->twig->render($template, array_merge((array) $context->get('vars'), [
+            $params = array_merge((array) $context->get('vars'), [
                 'subject' => $subject,
                 'context' => $context,
-            ]));
+            ]);
+
+            if ($block = $context->get('block')) {
+                $revealed = $this->twig->load($template)->renderBlock($block, $params);
+            } else {
+                $revealed = $this->twig->render($template, $params);
+            }
             $data = ['html' => $revealed];
         } else {
             $revealed = $discloser->disclose($subject, $context);

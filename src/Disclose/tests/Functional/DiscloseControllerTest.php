@@ -34,11 +34,12 @@ final class DiscloseControllerTest extends WebTestCase
         self::assertStringContainsString('"value":"the-secret"', $response->getContent());
     }
 
-    public function testRendersAServerTemplateWhenConfigured(): void
+    public function testRendersAServerTemplateBlockWhenConfigured(): void
     {
         $client = $this->authenticatedClient();
         $context = DiscloseContext::create(FixtureData::class, '42', 'secret', [
             'template' => 'disclose_render.html.twig',
+            'block' => 'body',
             'vars' => ['greeting' => 'Hello'],
         ]);
         $client->request('GET', static::getContainer()->get('ux.disclose.url_generator')->generate($context));
