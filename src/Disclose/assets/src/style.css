@@ -1,0 +1,38 @@
+.disclose-trigger,
+.disclose-hide {
+    font: inherit;
+    line-height: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 0;
+    border-radius: 0.25rem;
+    padding: 0.25rem 0.75rem;
+    cursor: pointer;
+    background: var(--disclose-background, #f3f4f6);
+    color: var(--disclose-color, #1f2937);
+}
+
+.disclose-trigger:disabled {
+    cursor: progress;
+    opacity: 0.7;
+}
+
+.disclose-content {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.disclose-content[hidden] {
+    display: none;
+}
+
+.disclose-value {
+    color: var(--disclose-value-color, inherit);
+}
+
+.disclose-error {
+    margin-top: 0.5rem;
+    color: var(--disclose-error-color, #b91c1c);
+}

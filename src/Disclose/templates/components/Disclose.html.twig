@@ -1,0 +1,44 @@
+{% set reveal_label = this.revealLabel ?? ('Reveal'|trans({}, 'DiscloseBundle')) %}
+{% set hide_label = this.hideLabel ?? ('Hide'|trans({}, 'DiscloseBundle')) %}
+<div {{ attributes.defaults({
+    'data-controller': 'disclose',
+    'data-disclose-url-value': this.url,
+    'data-disclose-mask-value': this.mask,
+    'data-disclose-render-html-value': this.renderHtml ? 'true' : 'false',
+    'data-disclose-reveal-label-value': this.revealLabel ?? ('Reveal'|trans({}, 'DiscloseBundle')),
+    'data-disclose-hide-label-value': this.hideLabel ?? ('Hide'|trans({}, 'DiscloseBundle')),
+    'data-disclose-loading-label-value': this.loadingLabel ?? ('Loading'|trans({}, 'DiscloseBundle')),
+    'data-disclose-error-label-value': this.errorLabel ?? ('Unable to disclose.'|trans({}, 'DiscloseBundle')),
+    'data-disclose-rate-limited-label-value': this.rateLimitedLabel ?? ('Rate limit exceeded. Try again later.'|trans({}, 'DiscloseBundle')),
+}) }}>
+    {# View 1: the masked trigger #}
+    {% block button %}
+        <button
+            type="button"
+            class="disclose-trigger"
+            data-disclose-target="button"
+            data-action="disclose#reveal"
+            aria-label="{{ reveal_label }}"
+        >{{ this.mask }}</button>
+    {% endblock %}
+
+    {# View 2: the data display, hidden until revealed #}
+    {% block content %}
+        <div class="disclose-content" data-disclose-target="content" hidden>
+            {% block value %}
+                <div class="disclose-value" data-disclose-target="value"></div>
+            {% endblock %}
+            <button
+                type="button"
+                class="disclose-hide"
+                data-disclose-target="hideButton"
+                data-action="disclose#hide"
+                hidden
+            >{{ hide_label }}</button>
+        </div>
+    {% endblock %}
+
+    {% block error %}
+        <div class="disclose-error" data-disclose-target="error" role="alert" hidden></div>
+    {% endblock %}
+</div>
