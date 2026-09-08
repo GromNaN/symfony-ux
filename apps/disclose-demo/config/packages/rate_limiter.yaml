@@ -1,0 +1,20 @@
+framework:
+    cache:
+        # Persist the disclosure quotas in the database, so a server restart
+        # never resets a rate limit.
+        pools:
+            disclose.rate_limiter:
+                adapter: cache.adapter.doctrine_dbal
+                provider: 'doctrine.dbal.default_connection'
+                default_lifetime: 0
+
+    rate_limiter:
+        ux_disclose:
+            policy: fixed_window
+            limit: 5
+            interval: '1 minute'
+            cache_pool: disclose.rate_limiter
+
+# Key the disclosure rate limit on a per-visitor reference instead of the IP.
+disclose:
+    rate_limiter_subject_factory: App\Disclose\DemoSubjectFactory

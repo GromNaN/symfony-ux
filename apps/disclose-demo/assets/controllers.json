@@ -1,0 +1,14 @@
+{
+    "controllers": {
+        "@symfony/ux-disclose": {
+            "disclose": {
+                "enabled": true,
+                "fetch": "eager",
+                "autoimport": {
+                    "@symfony/ux-disclose/dist/style.min.css": true
+                }
+            }
+        }
+    },
+    "entrypoints": []
+}
