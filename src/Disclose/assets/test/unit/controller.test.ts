@@ -173,6 +173,26 @@ describe('DiscloseController', () => {
         expect(document.body.dataset.pwned).toBeUndefined();
     });
 
+    it('caches the value: hiding and re-showing does not fetch again', async () => {
+        const container = mount();
+        fetchMocker.mockResponse(JSON.stringify({ value: 'the-secret' }));
+
+        await userEvent.click(button(container));
+        await waitFor(() => expect(value(container)).toHaveTextContent('the-secret'));
+
+        const hideButton = container.querySelector('[data-disclose-target="hideButton"]') as HTMLButtonElement;
+        await userEvent.click(hideButton);
+        expect(value(container)).not.toHaveTextContent('the-secret');
+
+        // Clear the fetch mock: a second request would now fail loudly.
+        fetchMocker.resetMocks();
+
+        await userEvent.click(button(container));
+
+        await waitFor(() => expect(value(container)).toHaveTextContent('the-secret'));
+        expect(error(container)).toHaveAttribute('hidden');
+    });
+
     it('hides the value again and scrubs it from the DOM', async () => {
         const container = mount();
         fetchMocker.mockResponse(JSON.stringify({ value: 'the-secret' }));

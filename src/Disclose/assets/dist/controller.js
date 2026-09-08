@@ -3,16 +3,22 @@ var _Class = class extends Controller {
 	constructor(..._args) {
 		super(..._args);
 		this.inFlight = false;
+		this.cachedValue = null;
 	}
 	connect() {
 		if (this.hasButtonTarget) {
 			this.buttonTarget.disabled = false;
 			this.buttonTarget.textContent = this.maskValue;
 		}
-		if (this.hasErrorTarget) this.errorTarget.hidden = true;
+		this.clearError();
 	}
 	async reveal() {
 		if (this.inFlight) return;
+		if (this.cachedValue !== null) {
+			this.displayValue(this.cachedValue);
+			this.dispatch("content-loaded", { detail: { value: this.cachedValue } });
+			return;
+		}
 		this.inFlight = true;
 		this.dispatch("start");
 		if (this.hasButtonTarget) {
@@ -20,7 +26,7 @@ var _Class = class extends Controller {
 			this.buttonTarget.setAttribute("aria-busy", "true");
 			this.buttonTarget.textContent = this.loadingLabelValue;
 		}
-		if (this.hasErrorTarget) this.errorTarget.hidden = true;
+		this.clearError();
 		try {
 			const response = await fetch(this.urlValue, { headers: { Accept: "application/json" } });
 			const data = await response.json().catch(() => ({}));
@@ -34,15 +40,9 @@ var _Class = class extends Controller {
 				this.dispatch("error", { detail: data });
 				return;
 			}
-			if (this.hasValueTarget) if (this.renderHtmlValue) this.valueTarget.innerHTML = String(data.html ?? data.value ?? "");
-			else this.valueTarget.textContent = String(data.value ?? "");
-			if (this.hasContentTarget) this.contentTarget.hidden = false;
-			if (this.hasHideButtonTarget) this.hideButtonTarget.hidden = false;
-			if (this.hasButtonTarget) {
-				this.buttonTarget.disabled = false;
-				this.buttonTarget.setAttribute("aria-busy", "false");
-				this.buttonTarget.hidden = true;
-			}
+			const value = this.renderHtmlValue ? String(data.html ?? data.value ?? "") : String(data.value ?? "");
+			this.cachedValue = value;
+			this.displayValue(value);
 			this.dispatch("content-loaded", { detail: { value } });
 		} catch (error) {
 			this.showError(this.errorLabelValue);
@@ -60,14 +60,32 @@ var _Class = class extends Controller {
 		if (this.hasValueTarget) this.valueTarget.replaceChildren();
 		if (this.hasContentTarget) this.contentTarget.hidden = true;
 		if (this.hasHideButtonTarget) this.hideButtonTarget.hidden = true;
-		if (this.hasErrorTarget) this.errorTarget.hidden = true;
 		if (this.hasButtonTarget) {
 			this.buttonTarget.hidden = false;
 			this.buttonTarget.disabled = false;
 			this.buttonTarget.setAttribute("aria-busy", "false");
 			this.buttonTarget.textContent = this.maskValue;
 		}
+		this.clearError();
 		this.dispatch("hidden");
+	}
+	displayValue(value) {
+		if (this.hasValueTarget) if (this.renderHtmlValue) this.valueTarget.innerHTML = value;
+		else this.valueTarget.textContent = value;
+		if (this.hasContentTarget) this.contentTarget.hidden = false;
+		if (this.hasHideButtonTarget) this.hideButtonTarget.hidden = false;
+		if (this.hasButtonTarget) {
+			this.buttonTarget.disabled = false;
+			this.buttonTarget.setAttribute("aria-busy", "false");
+			this.buttonTarget.hidden = true;
+		}
+		this.clearError();
+	}
+	clearError() {
+		if (this.hasErrorTarget) {
+			this.errorTarget.hidden = true;
+			this.errorTarget.textContent = "";
+		}
 	}
 	showError(message) {
 		if (this.hasErrorTarget) {

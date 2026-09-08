@@ -51,9 +51,12 @@ declare class export_default extends Controller {
   readonly errorTarget: HTMLElement;
   readonly hasErrorTarget: boolean;
   private inFlight;
+  private cachedValue;
   connect(): void;
   reveal(): Promise<void>;
   hide(): void;
+  private displayValue;
+  private clearError;
   private showError;
 }
 export { export_default as default };
