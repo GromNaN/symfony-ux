@@ -52,11 +52,12 @@ final class DoctrinePersistenceContextProvider implements ContextProviderInterfa
             // an associative array, ODM exposes a single getIdentifierValue().
             if (method_exists($metadata, 'getIdentifierValues')) {
                 $ids = (array) $metadata->getIdentifierValues($subject);
+                $id = 1 === \count($ids) ? reset($ids) : $ids;
+            } elseif (method_exists($metadata, 'getIdentifierValue')) {
+                $id = $metadata->getIdentifierValue($subject);
             } else {
-                $ids = [$metadata->getIdentifierValue($subject)];
+                throw new \LogicException(\sprintf('The object metadata of class "%s" must implement "getIdentifierValues()" or "getIdentifierValue()" to build a disclose context.', $subject::class));
             }
-
-            $id = 1 === \count($ids) ? reset($ids) : $ids;
 
             return DiscloseContext::create($subject::class, $id, $field, $extra);
         }
