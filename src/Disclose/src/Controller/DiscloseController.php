@@ -65,7 +65,7 @@ final class DiscloseController
 
         if (!$discloser->isGranted($subject)) {
             $this->auditLogger->log($context, DiscloseStatus::AuthDenied, $identity);
-            $this->eventDispatcher->dispatch(new DiscloseEvent($context, $subject, status: DiscloseStatus::AuthDenied), DiscloseEvent::AUTH_DENIED);
+            $this->eventDispatcher->dispatch(new DiscloseEvent($context, $subject, status: DiscloseStatus::AuthDenied), DiscloseEvent::REJECTED);
 
             return $this->fail(403, 'access_denied', 'DISCLOSE_DENIED');
         }
@@ -75,7 +75,7 @@ final class DiscloseController
             $retryAfter = $rateLimit->getRetryAfter();
             $seconds = $retryAfter ? max(0, $retryAfter->getTimestamp() - time()) : 1;
             $this->auditLogger->log($context, DiscloseStatus::RateLimited, $identity, ['retry_after' => $seconds]);
-            $this->eventDispatcher->dispatch(new DiscloseEvent($context, $subject, status: DiscloseStatus::RateLimited), DiscloseEvent::RATE_LIMITED);
+            $this->eventDispatcher->dispatch(new DiscloseEvent($context, $subject, status: DiscloseStatus::RateLimited), DiscloseEvent::REJECTED);
 
             $response = new JsonResponse([
                 'error' => 'rate_limited',

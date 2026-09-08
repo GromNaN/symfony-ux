@@ -38,19 +38,14 @@ final class DiscloseEvent extends Event
     public const SUCCESS = 'disclose.success';
 
     /**
-     * Dispatched when the discloser rejects the request (HTTP 403).
+     * Dispatched when the disclosure is rejected (authorization denied or
+     * rate limited); the status carries the exact reason.
      */
-    public const AUTH_DENIED = 'disclose.auth_denied';
-
-    /**
-     * Dispatched when the rate limit is reached (HTTP 429).
-     */
-    public const RATE_LIMITED = 'disclose.rate_limited';
+    public const REJECTED = 'disclose.rejected';
 
     public function __construct(
         public readonly DiscloseContext $context,
         public readonly ?object $subject,
         public readonly DiscloseStatus $status,
-    ) {
-    }
+    ) {}
 }
