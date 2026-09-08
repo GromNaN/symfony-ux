@@ -17,14 +17,18 @@ class HomeController extends AbstractController
     public function index(Request $request, ClientRepository $clients): Response
     {
         $page = max(1, (int) $request->query->get('page', 1));
-        $total = $clients->count([]);
-        $pages = max(1, (int) ceil($total / self::PAGE_SIZE));
-        $page = min($page, $pages);
+        $paginator = $clients->paginate($page, self::PAGE_SIZE);
+        $pages = max(1, (int) ceil(count($paginator) / self::PAGE_SIZE));
 
-        $rows = $clients->findBy([], ['id' => 'ASC'], self::PAGE_SIZE, ($page - 1) * self::PAGE_SIZE);
+        if ($page > $pages) {
+            // The requested page is out of range (e.g. the last rows were
+            // removed): fall back to the last page.
+            $page = $pages;
+            $paginator = $clients->paginate($page, self::PAGE_SIZE);
+        }
 
         $response = $this->render('ux_disclose/index.html.twig', [
-            'clients' => $rows,
+            'clients' => $paginator,
             'page' => $page,
             'pages' => $pages,
         ]);
