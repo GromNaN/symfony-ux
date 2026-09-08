@@ -27,14 +27,30 @@ use Symfony\UX\Disclose\Context\DiscloseContext;
  */
 final class DiscloseEvent extends Event
 {
+    /**
+     * Dispatched before the value is fetched, once authorization passed.
+     */
     public const ATTEMPT = 'disclose.attempt';
+
+    /**
+     * Dispatched after the value was extracted and is about to be returned.
+     */
     public const SUCCESS = 'disclose.success';
+
+    /**
+     * Dispatched when the discloser rejects the request (HTTP 403).
+     */
     public const AUTH_DENIED = 'disclose.auth_denied';
+
+    /**
+     * Dispatched when the rate limit is reached (HTTP 429).
+     */
     public const RATE_LIMITED = 'disclose.rate_limited';
 
     public function __construct(
         public readonly DiscloseContext $context,
-        public readonly ?object $subject = null,
+        public readonly ?object $subject,
         public readonly DiscloseStatus $status,
-    ) {}
+    ) {
+    }
 }
