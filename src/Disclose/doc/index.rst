@@ -234,23 +234,16 @@ only accepted when every listed limiter accepts it.
     disclose:
         rate_limiter: ['ux_disclose_burst', 'ux_disclose_daily']
 
-Concurrent requests
-~~~~~~~~~~~~~~~~~~~
+Concurrent requests and the lock
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Rate limiter ``consume()`` is a read-modify-write on the cache. Without a lock,
 a burst of simultaneous requests can race past the quota (each of them reads the
-same remaining budget). Install `symfony/lock` and set the limiter's
-``lock_factory`` to serialize the check:
-
-.. code-block:: yaml
-
-    framework:
-        rate_limiter:
-            ux_disclose:
-                lock_factory: 'lock.default'
-
-When ``symfony/lock`` is installed, the bundle proposes this configuration by
-default, and the demo app enables it too.
+same remaining budget). The Lock component is a **hard requirement** of the
+bundle: it registers a flock lock factory in the cache directory and proposes it
+as the default ``lock_factory`` of the rate limiter, so concurrent requests
+serialize and exactly the configured quota passes. To plug another lock store
+(for example a DBAL-backed one), set ``lock_factory`` to your own factory:
 
 To key the limiter differently than user-then-IP, set ``rate_limiter_subject_factory``
 to a service implementing ``DiscloseRateLimitSubjectFactoryInterface``.

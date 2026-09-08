@@ -27,10 +27,13 @@ final class DiscloseEvent extends Event
     public const SUCCESS = 'disclose.success';
     public const REJECTED = 'disclose.rejected';
 
+    /**
+     * The event never carries the disclosed value: listeners must not be able
+     * to observe the sensitive data.
+     */
     public function __construct(
         public readonly DiscloseContext $context,
         public readonly ?object $subject = null,
-        public readonly ?string $value = null,
         public readonly ?DiscloseStatus $status = null,
     ) {
     }

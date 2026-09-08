@@ -104,7 +104,7 @@ final class DiscloseController
         }
 
         $this->auditLogger->log($context, DiscloseStatus::Success, $identity);
-        $this->eventDispatcher->dispatch(new DiscloseEvent($context, $subject, $revealed), DiscloseEvent::SUCCESS);
+        $this->eventDispatcher->dispatch(new DiscloseEvent($context, $subject), DiscloseEvent::SUCCESS);
 
         return $this->withNoStore(new JsonResponse($data));
     }

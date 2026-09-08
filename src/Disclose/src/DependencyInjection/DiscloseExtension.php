@@ -20,6 +20,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
+use Symfony\Component\Lock\LockFactory;
+use Symfony\Component\Lock\Store\FlockStore;
 use Symfony\UX\Disclose\Audit\DiscloseAuditLogger;
 use Symfony\UX\Disclose\Checksum\ChecksumCalculator;
 use Symfony\UX\Disclose\Context\DiscloseContextFactory;
@@ -59,6 +61,16 @@ final class DiscloseExtension extends ConfigurableExtension implements PrependEx
 
         $container->register('ux.disclose.context_factory', DiscloseContextFactory::class)
             ->setArguments([new TaggedIteratorArgument('ux.disclose.context_provider')])
+        ;
+
+        // A bundle-owned lock factory makes the disclosure rate limiter
+        // race-safe out of the box. The application can override the
+        // "lock_factory" option of the limiter to plug its own lock store.
+        $container->register('ux.disclose.lock_store', FlockStore::class)
+            ->setArguments(['%kernel.cache_dir%/locks'])
+        ;
+        $container->register('ux.disclose.lock_factory', LockFactory::class)
+            ->setArguments([new Reference('ux.disclose.lock_store')])
         ;
 
         $managerRegistries = [];
@@ -144,10 +156,13 @@ final class DiscloseExtension extends ConfigurableExtension implements PrependEx
     public function prepend(ContainerBuilder $container): void
     {
         // Proposal by default so the disclosure endpoint is rate limited out of
-        // the box. The application may override any key by configuring the
-        // "ux_disclose" limiter of the framework bundle, exactly like any other
-        // rate limiter (for example "policy: no_limit" disables the limit, or
-        // "lock_factory" adds a lock to protect concurrent requests).
+        // the box. The Lock component is a hard requirement: consume() serializes
+        // through the bundle-owned flock lock factory, so a burst of
+        // simultaneous requests cannot race past the quota. The application may
+        // override any key by configuring the "ux_disclose" limiter of the
+        // framework bundle, exactly like any other rate limiter (for example
+        // "policy: no_limit" disables the limit, or a custom "lock_factory"
+        // plugs another lock store).
         $container->prependExtensionConfig('framework', [
             'rate_limiter' => [
                 'ux_disclose' => [
@@ -155,6 +170,7 @@ final class DiscloseExtension extends ConfigurableExtension implements PrependEx
                     'limit' => 10,
                     'interval' => '10 minutes',
                     'cache_pool' => 'cache.app',
+                    'lock_factory' => 'ux.disclose.lock_factory',
                 ],
             ],
         ]);
