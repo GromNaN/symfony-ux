@@ -71,9 +71,14 @@ final class DiscloseExtension extends ConfigurableExtension implements PrependEx
             ->setArguments([new TaggedIteratorArgument('ux.disclose.discloser')])
         ;
 
+        $rateLimiterFactories = [];
+        foreach ($config['rate_limiter'] as $name) {
+            $rateLimiterFactories[] = new Reference('limiter.'.$name, ContainerInterface::NULL_ON_INVALID_REFERENCE);
+        }
+
         $rateLimiterArguments = [
             new Reference('security.helper', ContainerInterface::NULL_ON_INVALID_REFERENCE),
-            new Reference('limiter.ux_disclose', ContainerInterface::NULL_ON_INVALID_REFERENCE),
+            $rateLimiterFactories,
         ];
 
         if ($config['rate_limiter_subject_factory']) {
@@ -128,7 +133,8 @@ final class DiscloseExtension extends ConfigurableExtension implements PrependEx
         // Proposal by default so the disclosure endpoint is rate limited out of
         // the box. The application may override any key by configuring the
         // "ux_disclose" limiter of the framework bundle, exactly like any other
-        // rate limiter (for example "policy: no_limit" disables the limit).
+        // rate limiter (for example "policy: no_limit" disables the limit, or
+        // "lock_factory" adds a lock to protect concurrent requests).
         $container->prependExtensionConfig('framework', [
             'rate_limiter' => [
                 'ux_disclose' => [

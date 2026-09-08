@@ -16,3 +16,8 @@
 /public/assets/
 /assets/vendor/
 ###< symfony/asset-mapper ###
+/config/reference.php
+
+# PHP CS Fixer configuration
+/.php-cs-fixer.cache
+/.php-cs-fixer.php

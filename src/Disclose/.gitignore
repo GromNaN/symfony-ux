@@ -4,3 +4,7 @@
 /phpunit.xml
 /.phpunit.cache
 /var/
+
+# PHP CS Fixer configuration
+/.php-cs-fixer.cache
+/.php-cs-fixer.php

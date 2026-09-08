@@ -1,5 +1,6 @@
 {% set reveal_label = this.revealLabel ?? ('Reveal'|trans({}, 'DiscloseBundle')) %}
 {% set hide_label = this.hideLabel ?? ('Hide'|trans({}, 'DiscloseBundle')) %}
+{% set title = this.title ?? ('Click to disclose. Disclosures are rate limited, use only when necessary.'|trans({}, 'DiscloseBundle')) %}
 <div {{ attributes.defaults({
     'data-controller': 'disclose',
     'data-disclose-url-value': this.url,
@@ -19,7 +20,8 @@
             data-disclose-target="button"
             data-action="disclose#reveal"
             aria-label="{{ reveal_label }}"
-        >{{ this.mask }}</button>
+            title="{{ title }}"
+        ><span class="disclose-mask" aria-hidden="true">{{ this.mask }}</span></button>
     {% endblock %}
 
     {# View 2: the data display, hidden until revealed #}

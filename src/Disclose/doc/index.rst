@@ -209,6 +209,49 @@ the quotas:
             ux_disclose:
                 cache_pool: disclose.rate_limiter
 
+Combine several limiters
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+A disclosure can be gated by several framework limiters at once, for example
+a short burst window (human speed) and a daily quota (total volume). List the
+limiter names in the ``rate_limiter`` option, as a single string or an array.
+The bundle combines them with the RateLimiter ``CompoundLimiter``: a request is
+only accepted when every listed limiter accepts it.
+
+.. code-block:: yaml
+
+    framework:
+        rate_limiter:
+            ux_disclose_burst:
+                policy: fixed_window
+                limit: 5
+                interval: '1 minute'
+            ux_disclose_daily:
+                policy: fixed_window
+                limit: 200
+                interval: '1 day'
+
+    disclose:
+        rate_limiter: ['ux_disclose_burst', 'ux_disclose_daily']
+
+Concurrent requests
+~~~~~~~~~~~~~~~~~~~
+
+Rate limiter ``consume()`` is a read-modify-write on the cache. Without a lock,
+a burst of simultaneous requests can race past the quota (each of them reads the
+same remaining budget). Install `symfony/lock` and set the limiter's
+``lock_factory`` to serialize the check:
+
+.. code-block:: yaml
+
+    framework:
+        rate_limiter:
+            ux_disclose:
+                lock_factory: 'lock.default'
+
+When ``symfony/lock`` is installed, the bundle proposes this configuration by
+default, and the demo app enables it too.
+
 To key the limiter differently than user-then-IP, set ``rate_limiter_subject_factory``
 to a service implementing ``DiscloseRateLimitSubjectFactoryInterface``.
 

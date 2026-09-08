@@ -28,6 +28,15 @@ final class Configuration implements ConfigurationInterface
 
         $rootNode
             ->children()
+                ->arrayNode('rate_limiter')
+                    ->info('Names of the framework rate limiters combined for every disclosure. A request is accepted only when every limiter accepts it (for example a burst window plus a daily quota).')
+                    ->beforeNormalization()
+                        ->ifString()
+                        ->then(static fn (string $value): array => [$value])
+                    ->end()
+                    ->defaultValue(['ux_disclose'])
+                    ->scalarPrototype()->end()
+                ->end()
                 ->scalarNode('rate_limiter_subject_factory')
                     ->info('Service id computing the rate-limit subject, to key the limiter differently than user-then-IP.')
                     ->defaultNull()

@@ -418,7 +418,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         enabled?: bool|Param, // Default: false
  *     },
  *     lock?: Param|bool|string|array{ // Lock configuration
- *         enabled?: bool|Param, // Default: false
+ *         enabled?: bool|Param, // Default: true
  *         resources?: Param|string|array<string, Param|string|list<scalar|Param|null>>,
  *     },
  *     semaphore?: Param|bool|string|array{ // Semaphore configuration
@@ -1288,6 +1288,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     controllers_json?: scalar|Param|null, // Deprecated: The "twig_component.controllers_json" config option is deprecated, and will be removed in 3.0. // Default: null
  * }
  * @psalm-type DiscloseConfig = array{
+ *     rate_limiter?: Param|string|list<scalar|Param|null>,
  *     rate_limiter_subject_factory?: scalar|Param|null, // Service id computing the rate-limit subject, to key the limiter differently than user-then-IP. // Default: null
  *     logger?: scalar|Param|null, // PSR-3 logger service id used for the audit trail. // Default: "logger"
  * }

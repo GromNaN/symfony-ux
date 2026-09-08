@@ -15,4 +15,5 @@ return [
     'Loading' => 'Loading',
     'Unable to disclose.' => 'Unable to disclose.',
     'Rate limit exceeded. Try again later.' => 'Rate limit exceeded. Try again later.',
+    'Click to disclose. Disclosures are rate limited, use only when necessary.' => 'Click to disclose. Disclosures are rate limited, use only when necessary.',
 ];

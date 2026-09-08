@@ -64,6 +64,12 @@ final class DiscloseComponent
     public string $mask = '••••••';
 
     /**
+     * Native tooltip shown on hover for the reveal button. Null uses the
+     * bundle translation.
+     */
+    public ?string $title = null;
+
+    /**
      * @var string|null null uses the bundle translation
      */
     public ?string $revealLabel = null;

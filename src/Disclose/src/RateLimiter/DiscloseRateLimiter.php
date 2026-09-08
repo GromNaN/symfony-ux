@@ -13,16 +13,19 @@ namespace Symfony\UX\Disclose\RateLimiter;
 
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\RateLimiter\CompoundLimiter;
 use Symfony\Component\RateLimiter\RateLimit;
 use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
- * Consumes a token for the current request against the rate limiter.
+ * Consumes a token for the current request against one or more rate limiters.
  *
- * The limiter is keyed per authenticated user and falls back to the client IP
- * for anonymous requests, unless the application provides a custom subject
- * factory.
+ * Several limiters can be combined (for example a short burst window and a
+ * daily quota): a request is only accepted when every limiter accepts it, and
+ * the token is reserved on all of them or on none. The key is the
+ * authenticated user, falling back to the client IP, unless the application
+ * provides a custom subject factory.
  *
  * @author Jérôme Tamarelle <jerome@tamarelle.net>
  *
@@ -30,23 +33,37 @@ use Symfony\Component\Security\Core\User\UserInterface;
  */
 final class DiscloseRateLimiter
 {
+    /**
+     * @param RateLimiterFactory[] $rateLimiterFactories
+     */
     public function __construct(
         private readonly ?Security $security = null,
-        private readonly ?RateLimiterFactory $rateLimiterFactory = null,
+        private readonly array $rateLimiterFactories = [],
         private readonly ?DiscloseRateLimitSubjectFactoryInterface $subjectFactory = null,
     ) {
     }
 
     /**
-     * Consumes one token. Returns null when the rate limiter is disabled.
+     * Consumes one token. Returns null when no rate limiter is configured.
      */
     public function consume(Request $request): ?RateLimit
     {
-        if (null === $this->rateLimiterFactory) {
+        if (!$this->rateLimiterFactories) {
             return null;
         }
 
-        return $this->rateLimiterFactory->create($this->resolveSubject($request))->consume();
+        $key = $this->resolveSubject($request);
+        $limiters = [];
+
+        foreach ($this->rateLimiterFactories as $factory) {
+            $limiters[] = $factory->create($key);
+        }
+
+        if (1 === \count($limiters)) {
+            return $limiters[0]->consume();
+        }
+
+        return new CompoundLimiter($limiters)->consume();
     }
 
     /**

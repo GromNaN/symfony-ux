@@ -1217,6 +1217,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     },
  * }
  * @psalm-type DiscloseConfig = array{
+ *     rate_limiter?: Param|string|list<scalar|Param|null>,
  *     rate_limiter_subject_factory?: scalar|Param|null, // Service id computing the rate-limit subject, to key the limiter differently than user-then-IP. // Default: null
  *     logger?: scalar|Param|null, // PSR-3 logger service id used for the audit trail. // Default: "logger"
  * }
