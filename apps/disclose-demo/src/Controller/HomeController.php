@@ -11,7 +11,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class HomeController extends AbstractController
 {
-    private const int PAGE_SIZE = 20;
+    private const int PAGE_SIZE = 6;
 
     #[Route('/', name: 'home')]
     public function index(Request $request, ClientRepository $clients): Response

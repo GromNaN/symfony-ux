@@ -22,7 +22,7 @@
             type="button"
             class="disclose-trigger"
             data-disclose-target="button"
-            data-action="{{ this.toggle ? 'disclose#toggle' : 'disclose#reveal' }}"
+            data-action="{{ this.toggle ? 'disclose#toggle:stop' : 'disclose#reveal:stop' }}"
             aria-label="{{ reveal_label }}"
             title="{{ title }}"
         >
@@ -53,7 +53,7 @@
                     type="button"
                     class="disclose-hide"
                     data-disclose-target="hideButton"
-                    data-action="disclose#hide"
+                    data-action="disclose#hide:stop"
                     hidden
                 >{{ hide_label }}</button>
             {% endif %}
