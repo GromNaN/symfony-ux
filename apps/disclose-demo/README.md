@@ -20,8 +20,8 @@ php -S 127.0.0.1:8010 -t public public/index.php
 
 Then browse:
 
-- `/`             plain page with the client table (emails and phones masked)
-- `/admin`        EasyAdmin dashboard (HTTP Basic: `admin` / `admin`)
+- `/` plain page with the client table (emails and phones masked)
+- `/admin` EasyAdmin dashboard (HTTP Basic: `admin` / `admin`)
 - `/admin/client` EasyAdmin CRUD, email and phone columns disclosed on click
 
 Every click triggers a request to `/disclose/ux/disclose`. The endpoint

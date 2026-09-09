@@ -1,97 +1,24 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-    <style>
-        .client-list {
-            min-height: 24rem;
-            border: 1px solid color-mix(in srgb, currentColor 14%, transparent);
-            border-radius: 0.5rem;
-            overflow: hidden;
-        }
-        .client-row {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 0.55rem 1rem;
-            background: color-mix(in srgb, currentColor 2%, transparent);
-        }
-        .client-row + .client-row {
-            border-top: 1px solid color-mix(in srgb, currentColor 10%, transparent);
-        }
-        .client-row:hover {
-            background: color-mix(in srgb, currentColor 6%, transparent);
-        }
-        .client-name {
-            flex: 1;
-            min-width: 0;
-            font-weight: 600;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        .c-masked {
-            width: 14rem;
-            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-            letter-spacing: 0.15em;
-            opacity: 0.75;
-            user-select: none;
-        }
-        .c-protected {
-            width: 24rem;
-            display: inline-flex;
-            align-items: center;
-            justify-content: flex-end;
-            gap: 0.75rem;
-        }
-        .c-protected .c-eye { flex: none; }
-        .c-eye {
-            width: 2rem;
-            height: 2rem;
-            display: inline-flex;
-            flex: none;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid color-mix(in srgb, currentColor 26%, transparent);
-            border-radius: 999px;
-            background: transparent;
-            color: inherit;
-            cursor: pointer;
-            line-height: 0;
-        }
-        .c-eye:hover, .c-eye:focus-visible {
-            border-color: currentColor;
-            background: color-mix(in srgb, currentColor 12%, transparent);
-            box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 16%, transparent);
-            outline: none;
-        }
-        .c-eye[hidden] { display: none; }
-        .c-eye-icon { width: 1.15rem; height: 1.15rem; }
-        .c-value { font-variant-numeric: tabular-nums; }
-        .c-sep { opacity: 0.5; margin: 0 0.15rem; }
-        .client-pagination {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-top: 1rem;
-        }
-        .client-page-indicator { opacity: 0.8; }
-    </style>
-
-    <div class="container my-5">
-        <h1>Clients</h1>
-        <p class="text-muted">
-            Emails and phone numbers are masked. Click the eye at the end of a row
-            to reveal the whole row, through the rate-limited, audited
-            <code>/disclose/ux/disclose</code> endpoint.
-        </p>
+    <main class="shell">
+        <header class="page-head">
+            <h1>Clients</h1>
+            <p>
+                Contact details are masked. Click the eye on a card to reveal it on demand,
+                through the rate-limited, audited <code>/disclose/ux/disclose</code> endpoint.
+            </p>
+        </header>
 
         <turbo-frame id="clients_frame">
             <div class="client-list">
-                {% include 'ux_disclose/_clients.html.twig' %}
+                {{ include('ux_disclose/_clients.html.twig') }}
             </div>
-            {% include 'ux_disclose/_pagination.html.twig' %}
+            {{ include('ux_disclose/_pagination.html.twig') }}
         </turbo-frame>
 
-        <p class="mt-4"><a href="{{ path('admin') }}">Open the EasyAdmin CRUD (HTTP Basic: admin/admin)</a></p>
-    </div>
+        <p class="page-foot">
+            <a href="{{ path('admin') }}">Open the EasyAdmin CRUD (HTTP Basic: admin/admin)</a>
+        </p>
+    </main>
 {% endblock %}

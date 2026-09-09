@@ -24,7 +24,7 @@ final class ClientRepository extends ServiceEntityRepository
     public function paginate(int $page, int $pageSize): Paginator
     {
         $query = $this->getEntityManager()
-            ->createQuery('SELECT c FROM '.Client::class.' c ORDER BY c.id ASC')
+            ->createQuery('SELECT c FROM ' . Client::class . ' c ORDER BY c.id ASC')
             ->setFirstResult(max(0, ($page - 1) * $pageSize))
             ->setMaxResults($pageSize);
 
