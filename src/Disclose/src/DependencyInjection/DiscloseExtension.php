@@ -127,6 +127,7 @@ final class DiscloseExtension extends ConfigurableExtension implements PrependEx
                 new Reference('ux.disclose.rate_limiter'),
                 new Reference('ux.disclose.audit_logger'),
                 new Reference('event_dispatcher'),
+                new Reference('security.helper', ContainerInterface::NULL_ON_INVALID_REFERENCE),
                 new Reference('twig'),
             ])
             ->addTag('controller.service_arguments')

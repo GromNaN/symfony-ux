@@ -12,6 +12,7 @@
 namespace App\Disclose;
 
 use App\Entity\Client;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\UX\Disclose\Context\DiscloseContext;
 use Symfony\UX\Disclose\DiscloserInterface;
 
@@ -25,7 +26,7 @@ final class ClientDiscloser implements DiscloserInterface
         return $subject instanceof Client;
     }
 
-    public function isGranted(object $subject): bool
+    public function isGranted(Security $security, object $subject, DiscloseContext $context): bool
     {
         return true;
     }

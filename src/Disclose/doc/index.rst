@@ -165,6 +165,7 @@ extracts the value:
 
 .. code-block:: php
 
+    use Symfony\Bundle\SecurityBundle\Security;
     use Symfony\UX\Disclose\Context\DiscloseContext;
     use Symfony\UX\Disclose\DiscloserInterface;
 
@@ -175,9 +176,11 @@ extracts the value:
             return $subject instanceof Client;
         }
 
-        public function isGranted(object $subject): bool
+        public function isGranted(Security $security, object $subject, DiscloseContext $context): bool
         {
-            return true; // or $this->security->isGranted('CLIENT_VIEW', $subject);
+            // Delegate to the Security component (voters, roles). The context
+            // carries the field, so the policy can be field aware.
+            return $security->isGranted('CLIENT_'.$context->field, $subject);
         }
 
         public function disclose(object $subject, DiscloseContext $context): string
@@ -191,7 +194,10 @@ Authorization
 -------------
 
 The bundle enforces ``DiscloserInterface::isGranted()`` before anything else.
-Unauthorized requests receive an HTTP ``403`` and the value is never fetched.
+It passes the Symfony ``Security`` helper, the resolved subject and the
+disclose context, so the policy delegates to the Security component (voters,
+roles). Unauthorized requests receive an HTTP ``403`` and the value is never
+fetched. When ``SecurityBundle`` is not installed, every disclosure is denied.
 Classify the disclosed fields server-side; never rely on the client hiding them.
 
 Rate limiting

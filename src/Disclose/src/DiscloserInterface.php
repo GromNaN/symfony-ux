@@ -11,6 +11,7 @@
 
 namespace Symfony\UX\Disclose;
 
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 use Symfony\UX\Disclose\Context\DiscloseContext;
 
@@ -35,9 +36,16 @@ interface DiscloserInterface
     /**
      * Whether the current request is allowed to disclose the subject.
      *
-     * This is enforced by the bundle before any value is returned.
+     * Delegate to the Security component, for example
+     * $security->isGranted('CLIENT_VIEW', $subject) or $security->isGranted('ROLE_USER').
+     * The context carries the field to disclose and the application-specific
+     * payload, so the policy can be field aware (for example a stricter
+     * attribute for an email than for a phone number).
+     *
+     * This is enforced by the bundle before any value is returned. When the
+     * SecurityBundle is not installed, no disclosure is allowed.
      */
-    public function isGranted(object $subject): bool;
+    public function isGranted(Security $security, object $subject, DiscloseContext $context): bool;
 
     /**
      * Returns the sensitive value to disclose for the given subject.

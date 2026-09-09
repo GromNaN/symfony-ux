@@ -21,18 +21,14 @@ use Symfony\UX\Disclose\Tests\Fixtures\Subject\FixtureData;
  */
 final class DummyDiscloser implements DiscloserInterface
 {
-    public function __construct(private readonly ?Security $security = null)
-    {
-    }
-
     public function supports(object $subject): bool
     {
         return $subject instanceof FixtureData;
     }
 
-    public function isGranted(object $subject): bool
+    public function isGranted(Security $security, object $subject, DiscloseContext $context): bool
     {
-        return null !== $this->security?->getUser();
+        return null !== $security->getUser();
     }
 
     public function disclose(object $subject, DiscloseContext $context): string

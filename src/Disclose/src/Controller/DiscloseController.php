@@ -11,6 +11,7 @@
 
 namespace Symfony\UX\Disclose\Controller;
 
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -44,6 +45,7 @@ final class DiscloseController
         private readonly DiscloseRateLimiter $rateLimiter,
         private readonly DiscloseAuditLogger $auditLogger,
         private readonly EventDispatcherInterface $eventDispatcher,
+        private readonly ?Security $security = null,
         private readonly ?Environment $twig = null,
     ) {
     }
@@ -65,7 +67,7 @@ final class DiscloseController
         $discloser = $this->discloserRegistry->getDiscloser($subject);
         $identity = $this->rateLimiter->identity($request);
 
-        if (!$discloser->isGranted($subject)) {
+        if (null === $this->security || !$discloser->isGranted($this->security, $subject, $context)) {
             $this->auditLogger->log($context, DiscloseStatus::AuthDenied, $identity);
             $this->eventDispatcher->dispatch(new DiscloseEvent($context, $subject, status: DiscloseStatus::AuthDenied), DiscloseEvent::REJECTED);
 
