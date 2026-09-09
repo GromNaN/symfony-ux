@@ -90,36 +90,42 @@ Revealing a whole block
 -----------------------
 
 A disclosure can return a whole server-rendered block instead of a single
-value, for example a set of fields inside a table. Point the `render` prop at a
-Twig template; on click, the bundle renders it server-side with the resolved
-subject and any `vars` you pass, and the controller injects the resulting HTML::
+value, for example a set of fields inside a table. Author a ``reveal`` block
+inside the component tag; on click, the bundle renders it server-side with the
+resolved subject (and any ``vars`` you pass) and the controller injects the
+resulting HTML:
 
-    <twig:ux:disclose :context="client" :render="'admin/client/details.html.twig'" :vars="{ title: 'Profile' }" />
+.. code-block:: twig
 
-To keep the revealed markup in the same template as the component, point
-``render`` at that template and name a ``block`` of it::
+    <twig:ux:disclose :context="client" :vars="{ title: 'Profile' }" toggle>
+        {% block reveal %}
+            <table class="table">
+                <tr><th>Email</th><td>{{ subject.email }}</td></tr>
+                <tr><th>Phone</th><td>{{ subject.phone }}</td></tr>
+            </table>
+        {% endblock %}
+    </twig:ux:disclose>
 
-    <twig:ux:disclose :context="client" render="admin/client/index.html.twig" block="client_details" />
+The ``reveal`` block is compiled into the component tag body but is never
+rendered on the initial mount: the secret stays out of the page HTML. The
+disclosure endpoint reloads that block at click time and renders it with
+``subject`` (the resolved object), ``context`` (the signed context) and the
+``vars`` you passed.
 
-    {# in admin/client/index.html.twig #}
-    {% block client_details %}
+The block receives ``subject`` and ``context`` exactly as if it were a native
+Twig block, so it can use any Twig feature (conditionals, includes, macros):
+
+.. code-block:: twig
+
+    {% block reveal %}
         <tr>
             <td>{{ subject.email }}</td>
             <td>{{ subject.phone }}</td>
         </tr>
     {% endblock %}
 
-The reveal template receives ``subject`` (the resolved object) and ``context``
-(the signed context), exactly as if it were a native Twig block::
-
-    {# templates/admin/client/details.html.twig #}
-    <table class="table">
-        <tr><th>Email</th><td>{{ subject.email }}</td></tr>
-        <tr><th>Phone</th><td>{{ subject.phone }}</td></tr>
-    </table>
-
-The returned HTML is injected through ``innerHTML``: only enable `render` for
-content produced by your own server-side templates.
+The returned HTML is injected through ``innerHTML``: the revealed markup is
+always produced by your own server-side templates, signed by the bundle.
 
 Subject resolution
 ------------------
@@ -283,7 +289,8 @@ Security considerations
 - The value never enters the initial HTML: the page contains only the signed
   reference. Source view, screenshots and DOM scraping leak nothing.
 - By default the fetched value is inserted with ``textContent``, never as HTML.
-  Only ``render`` mode injects server-side HTML, and it is your template.
+  Only the ``reveal`` block injects server-side HTML, and it is your own
+  template rendered by the bundle.
 - The signed reference cannot be tampered with to target other records.
 - Every reveal is a deliberate click, rate-limited, and audited: exfiltration is
   slow, loud and traceable.

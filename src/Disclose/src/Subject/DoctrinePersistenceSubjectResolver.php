@@ -26,8 +26,6 @@ use Symfony\UX\Disclose\Subject\Exception\UnmanagedSubjectClassException;
  * data-source agnostic.
  *
  * @author Jérôme Tamarelle <jerome@tamarelle.net>
- *
- * @internal
  */
 final class DoctrinePersistenceSubjectResolver implements SubjectResolverInterface
 {

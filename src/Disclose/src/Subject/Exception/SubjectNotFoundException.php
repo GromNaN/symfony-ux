@@ -15,7 +15,5 @@ namespace Symfony\UX\Disclose\Subject\Exception;
  * Thrown when no subject resolver can resolve a disclose context.
  *
  * @author Jérôme Tamarelle <jerome@tamarelle.net>
- *
- * @internal
  */
 final class SubjectNotFoundException extends \RuntimeException {}

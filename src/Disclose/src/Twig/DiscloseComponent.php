@@ -48,27 +48,22 @@ final class DiscloseComponent
     public array $payload = [];
 
     /**
-     * Twig template rendered on the server when the value is disclosed, with
-     * the resolved subject and "vars" as variables. Use it to reveal a whole
-     * block of markup (for example a table of fields).
-     */
-    public ?string $render = null;
-
-    /**
-     * Name of a block of the "render" template to render at disclosure time,
-     * so the revealed markup can live in the same template as the component
-     * instead of a dedicated file. The block receives "subject" and "context".
-     */
-    public ?string $block = null;
-
-    /**
-     * Extra variables passed to the "render" template.
+     * Extra variables passed to the "reveal" block when it is rendered by the
+     * disclosure endpoint (in addition to "subject" and "context").
      *
      * @var array<string, mixed>
      */
     public array $vars = [];
 
     public string $mask = '••••••';
+
+    /**
+     * Single-button "toggle" mode: the reveal trigger stays in place, never
+     * hides and never gets its content swapped for the loading text. The icon
+     * swaps through CSS, and a spinner shows while the request is in flight.
+     * Null keeps the legacy two-button behavior (default).
+     */
+    public ?bool $toggle = null;
 
     /**
      * Native tooltip shown on hover for the reveal button. Null uses the
@@ -90,6 +85,15 @@ final class DiscloseComponent
     public ?string $rateLimitedLabel = null;
 
     private ?string $url = null;
+
+    private ?DiscloseContext $builtContext = null;
+
+    /**
+     * True when an inline "reveal" block was detected on the component tag and
+     * the signed context has been amended to reference it. Set by the bundle
+     * PreRenderEvent subscriber after mount.
+     */
+    private bool $revealBlockEnabled = false;
 
     private ?DiscloseUrlGenerator $urlGenerator = null;
 
@@ -124,16 +128,12 @@ final class DiscloseComponent
         }
 
         $extra = $context->getExtra();
-        if (null !== $this->render) {
-            $extra['template'] = $this->render;
-            $extra['block'] = $this->block;
-            $extra['vars'] = $this->vars;
-        }
         if ($this->payload) {
             $extra = array_merge($extra, $this->payload);
         }
 
-        $this->url = $this->urlGenerator->generate($context->withExtra($extra));
+        $this->builtContext = $context->withExtra($extra);
+        $this->url = $this->urlGenerator->generate($this->builtContext);
     }
 
     public function getUrl(): string
@@ -143,6 +143,32 @@ final class DiscloseComponent
 
     public function getRenderHtml(): bool
     {
-        return null !== $this->render;
+        return $this->revealBlockEnabled;
+    }
+
+    /**
+     * Captures the host template and the embedded module index that own an
+     * inline "reveal" block, so the disclosure endpoint can reload that module
+     * and render the block with the resolved subject.
+     *
+     * Called by the bundle PreRenderEvent subscriber after mount, when a
+     * "reveal" block was authored inside the component tag. This amends the
+     * signed context and regenerates the endpoint URL, so the reference travels
+     * in the signed payload.
+     */
+    public function enableRevealBlock(string $hostTemplate, int $embeddedIndex): void
+    {
+        if (null === $this->builtContext || null === $this->urlGenerator) {
+            return;
+        }
+
+        $extra = $this->builtContext->getExtra();
+        $extra['template'] = $hostTemplate;
+        $extra['embedded_index'] = $embeddedIndex;
+        $extra['vars'] = $this->vars;
+
+        $this->builtContext = $this->builtContext->withExtra($extra);
+        $this->url = $this->urlGenerator->generate($this->builtContext);
+        $this->revealBlockEnabled = true;
     }
 }

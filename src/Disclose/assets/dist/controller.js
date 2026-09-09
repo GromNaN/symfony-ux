@@ -4,21 +4,29 @@ var _Class = class extends Controller {
 		super(..._args);
 		this.inFlight = false;
 		this.cachedValue = null;
+		this.revealed = false;
 		this.originalButtonHtml = null;
+		this.originalValueHtml = null;
 	}
 	connect() {
 		if (this.hasButtonTarget) {
 			this.originalButtonHtml = this.buttonTarget.innerHTML;
 			this.resetTrigger();
 		}
+		if (this.hasValueTarget) this.originalValueHtml = this.valueTarget.innerHTML;
 		this.clearError();
 	}
 	resetTrigger() {
 		if (this.hasButtonTarget) {
 			this.buttonTarget.disabled = false;
 			this.buttonTarget.setAttribute("aria-busy", "false");
+			if (this.toggleValue) {
+				this.buttonTarget.removeAttribute("data-disclose-revealed");
+				this.buttonTarget.setAttribute("aria-label", this.revealLabelValue);
+			}
 			this.buttonTarget.innerHTML = this.originalButtonHtml ?? this.maskValue;
 		}
+		this.revealed = false;
 	}
 	async reveal() {
 		if (this.inFlight) return;
@@ -32,7 +40,7 @@ var _Class = class extends Controller {
 		if (this.hasButtonTarget) {
 			this.buttonTarget.disabled = true;
 			this.buttonTarget.setAttribute("aria-busy", "true");
-			this.buttonTarget.textContent = this.loadingLabelValue;
+			if (!this.toggleValue) this.buttonTarget.textContent = this.loadingLabelValue;
 		}
 		this.clearError();
 		try {
@@ -57,29 +65,39 @@ var _Class = class extends Controller {
 			this.dispatch("error", { detail: { error: String(error) } });
 		} finally {
 			this.inFlight = false;
-			if (this.hasButtonTarget && !this.buttonTarget.hidden) this.resetTrigger();
+			if (this.hasButtonTarget) {
+				if (this.toggleValue ? !this.revealed : !this.buttonTarget.hidden) this.resetTrigger();
+			}
 		}
 	}
 	hide() {
-		if (this.hasValueTarget) this.valueTarget.replaceChildren();
+		if (this.hasValueTarget) this.valueTarget.innerHTML = this.originalValueHtml ?? "";
 		if (this.hasContentTarget) this.contentTarget.hidden = true;
 		if (this.hasHideButtonTarget) this.hideButtonTarget.hidden = true;
 		if (this.hasButtonTarget) {
-			this.buttonTarget.hidden = false;
+			if (!this.toggleValue) this.buttonTarget.hidden = false;
 			this.resetTrigger();
 		}
 		this.clearError();
 		this.dispatch("hidden");
 	}
+	toggle() {
+		if (this.revealed) this.hide();
+		else this.reveal();
+	}
 	displayValue(value) {
 		if (this.hasValueTarget) if (this.renderHtmlValue) this.valueTarget.innerHTML = value;
 		else this.valueTarget.textContent = value;
 		if (this.hasContentTarget) this.contentTarget.hidden = false;
-		if (this.hasHideButtonTarget) this.hideButtonTarget.hidden = false;
+		if (this.hasHideButtonTarget && !this.toggleValue) this.hideButtonTarget.hidden = false;
 		if (this.hasButtonTarget) {
 			this.buttonTarget.disabled = false;
 			this.buttonTarget.setAttribute("aria-busy", "false");
-			this.buttonTarget.hidden = true;
+			if (this.toggleValue) {
+				this.buttonTarget.setAttribute("data-disclose-revealed", "true");
+				this.buttonTarget.setAttribute("aria-label", this.hideLabelValue);
+				this.revealed = true;
+			} else this.buttonTarget.hidden = true;
 		}
 		this.clearError();
 	}
@@ -110,6 +128,10 @@ _Class.values = {
 		default: "••••••"
 	},
 	renderHtml: {
+		type: Boolean,
+		default: false
+	},
+	toggle: {
 		type: Boolean,
 		default: false
 	},

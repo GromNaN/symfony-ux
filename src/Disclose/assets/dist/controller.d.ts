@@ -11,6 +11,10 @@ declare class export_default extends Controller {
       type: BooleanConstructor;
       default: boolean;
     };
+    toggle: {
+      type: BooleanConstructor;
+      default: boolean;
+    };
     revealLabel: {
       type: StringConstructor;
       default: string;
@@ -35,6 +39,7 @@ declare class export_default extends Controller {
   readonly urlValue: string;
   readonly maskValue: string;
   readonly renderHtmlValue: boolean;
+  readonly toggleValue: boolean;
   readonly revealLabelValue: string;
   readonly hideLabelValue: string;
   readonly loadingLabelValue: string;
@@ -52,11 +57,14 @@ declare class export_default extends Controller {
   readonly hasErrorTarget: boolean;
   private inFlight;
   private cachedValue;
+  private revealed;
   private originalButtonHtml;
+  private originalValueHtml;
   connect(): void;
   private resetTrigger;
   reveal(): Promise<void>;
   hide(): void;
+  toggle(): void;
   private displayValue;
   private clearError;
   private showError;

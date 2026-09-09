@@ -34,20 +34,31 @@ final class DiscloseControllerTest extends WebTestCase
         self::assertStringContainsString('"value":"the-secret"', $response->getContent());
     }
 
-    public function testRendersAServerTemplateBlockWhenConfigured(): void
+    public function testRendersAnInlineRevealBlockOnDemand(): void
     {
         $client = $this->authenticatedClient();
-        $context = DiscloseContext::create(FixtureData::class, '42', 'secret', [
-            'template' => 'disclose_render.html.twig',
-            'block' => 'body',
-            'vars' => ['greeting' => 'Hello'],
+        $twig = static::getContainer()->get('twig');
+
+        $html = $twig->render('disclose_reveal_block.html.twig', [
+            'context' => DiscloseContext::create(FixtureData::class, '42'),
         ]);
-        $client->request('GET', static::getContainer()->get('ux.disclose.url_generator')->generate($context));
+
+        // The trigger is wired for HTML rendering and carries the signed URL,
+        // but the secret never reaches the initial page HTML.
+        self::assertStringContainsString('data-disclose-render-html-value="true"', $html);
+        self::assertStringContainsString('data-disclose-url-value="', $html);
+        self::assertStringNotContainsString('the-secret', $html);
+
+        preg_match('/data-disclose-url-value="([^"]+)"/', $html, $matches);
+        self::assertNotEmpty($matches[1], 'The disclose URL is baked into the trigger.');
+
+        // Twig escapes "&" as "&amp;" inside the attribute; decode before requesting.
+        $client->request('GET', html_entity_decode($matches[1], \ENT_QUOTES));
 
         $response = $client->getResponse();
         self::assertSame(200, $response->getStatusCode());
         $data = json_decode($response->getContent(), true, 512, \JSON_THROW_ON_ERROR);
-        self::assertStringContainsString('<p>Hello the-secret</p>', $data['html']);
+        self::assertSame('<p>Hello the-secret</p>', trim($data['html']));
     }
 
     public function testDeniesAnonymousUsers(): void

@@ -26,6 +26,15 @@ const componentHtml = (url: string): string => `
         <div data-disclose-target="error" role="alert" hidden></div>
     </div>`;
 
+const toggleComponentHtml = (url: string): string => `
+    <div data-controller="disclose" data-disclose-url-value="${url}" data-disclose-toggle-value="true">
+        <button type="button" data-disclose-target="button" data-action="disclose#toggle" aria-label="Reveal">••••••</button>
+        <div data-disclose-target="content" hidden>
+            <span data-disclose-target="value"></span>
+        </div>
+        <div data-disclose-target="error" role="alert" hidden></div>
+    </div>`;
+
 describe('DiscloseController', () => {
     beforeAll(() => {
         Application.start().register('disclose', DiscloseController);
@@ -206,5 +215,116 @@ describe('DiscloseController', () => {
         expect(value(container)).not.toHaveTextContent('the-secret');
         expect(content(container)).toHaveAttribute('hidden');
         expect(button(container)).not.toHaveAttribute('hidden');
+    });
+
+    describe('toggle mode', () => {
+        const mountToggle = (url = 'http://localhost/disclose'): HTMLElement => {
+            const container = document.createElement('div');
+            container.innerHTML = toggleComponentHtml(url);
+            document.body.innerHTML = '';
+            document.body.appendChild(container);
+
+            return container;
+        };
+
+        it('keeps the trigger in place and marks it revealed on click', async () => {
+            const container = mountToggle();
+            fetchMocker.mockResponse(JSON.stringify({ value: 'the-secret' }));
+
+            await userEvent.click(button(container));
+
+            await waitFor(() => expect(value(container)).toHaveTextContent('the-secret'));
+            expect(content(container)).not.toHaveAttribute('hidden');
+            // The single trigger never hides...
+            expect(button(container)).not.toHaveAttribute('hidden');
+            // ...and flips to the "hide" state.
+            expect(button(container)).toHaveAttribute('data-disclose-revealed', 'true');
+            expect(button(container)).toHaveAttribute('aria-label', 'Hide');
+        });
+
+        it('reveals then hides with the same button', async () => {
+            const container = mountToggle();
+            fetchMocker.mockResponse(JSON.stringify({ value: 'the-secret' }));
+
+            await userEvent.click(button(container));
+            await waitFor(() => expect(value(container)).toHaveTextContent('the-secret'));
+
+            await userEvent.click(button(container));
+
+            expect(value(container)).not.toHaveTextContent('the-secret');
+            expect(content(container)).toHaveAttribute('hidden');
+            expect(button(container)).not.toHaveAttribute('hidden');
+            expect(button(container)).not.toHaveAttribute('data-disclose-revealed');
+            expect(button(container)).toHaveAttribute('aria-label', 'Reveal');
+        });
+
+        it('does not wipe the trigger content while loading', async () => {
+            const container = mountToggle();
+            let resolveFetch!: (response: Response) => void;
+            fetchMocker.mockResponse(
+                () =>
+                    new Promise<Response>((resolve) => {
+                        resolveFetch = resolve;
+                    })
+            );
+
+            await userEvent.click(button(container));
+
+            await waitFor(() => expect(button(container)).toBeDisabled());
+            expect(button(container)).toHaveAttribute('aria-busy', 'true');
+            // The icon markup is preserved, not replaced by the loading label.
+            expect(button(container)).toHaveTextContent('••••••');
+
+            resolveFetch(
+                new Response(JSON.stringify({ value: 'the-secret' }), {
+                    status: 200,
+                    headers: { 'Content-Type': 'application/json' },
+                })
+            );
+
+            await waitFor(() => expect(value(container)).toHaveTextContent('the-secret'));
+            expect(button(container)).toBeEnabled();
+            expect(button(container)).toHaveAttribute('aria-busy', 'false');
+        });
+
+        it('caches the value: toggling hide then reveal does not fetch again', async () => {
+            const container = mountToggle();
+            fetchMocker.mockResponse(JSON.stringify({ value: 'the-secret' }));
+
+            await userEvent.click(button(container));
+            await waitFor(() => expect(value(container)).toHaveTextContent('the-secret'));
+
+            await userEvent.click(button(container));
+            expect(value(container)).not.toHaveTextContent('the-secret');
+
+            // A second request would now fail loudly.
+            fetchMocker.resetMocks();
+
+            await userEvent.click(button(container));
+
+            await waitFor(() => expect(value(container)).toHaveTextContent('the-secret'));
+            expect(error(container)).toHaveAttribute('hidden');
+        });
+
+        it('restores the masked placeholder when the value is hidden again', async () => {
+            const container = document.createElement('div');
+            container.innerHTML = toggleComponentHtml('http://localhost/disclose').replace(
+                /<span data-disclose-target="value"><\/span>/,
+                '<span data-disclose-target="value">••••••••</span>'
+            );
+            document.body.innerHTML = '';
+            document.body.appendChild(container);
+
+            fetchMocker.mockResponse(JSON.stringify({ value: 'the-secret' }));
+
+            await userEvent.click(button(container));
+            await waitFor(() => expect(value(container)).toHaveTextContent('the-secret'));
+
+            await userEvent.click(button(container));
+
+            // The original masked placeholder comes back instead of a blank slot.
+            expect(value(container)).toHaveTextContent('••••••••');
+            expect(value(container)).not.toHaveTextContent('the-secret');
+        });
     });
 });

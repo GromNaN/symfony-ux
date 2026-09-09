@@ -36,6 +36,20 @@ final class WiringTest extends KernelTestCase
         self::assertStringNotContainsString('the-secret', $html);
     }
 
+    public function testInlineRevealBlockSwitchesTheTriggerToHtmlModeWithoutExposingTheValue(): void
+    {
+        static::bootKernel();
+        $twig = static::getContainer()->get('twig');
+
+        $html = $twig->render('disclose_reveal_block.html.twig', [
+            'context' => DiscloseContext::create(FixtureData::class, '42'),
+        ]);
+
+        self::assertStringContainsString('data-disclose-render-html-value="true"', $html);
+        self::assertStringContainsString('data-disclose-url-value="', $html);
+        self::assertStringNotContainsString('the-secret', $html);
+    }
+
     public function testGeneratedUrlPointsToTheBundleRouteWithASignedContext(): void
     {
         static::bootKernel();

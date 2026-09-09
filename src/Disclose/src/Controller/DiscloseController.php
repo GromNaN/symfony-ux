@@ -24,6 +24,7 @@ use Symfony\UX\Disclose\RateLimiter\DiscloseRateLimiter;
 use Symfony\UX\Disclose\Subject\Exception\SubjectNotFoundException;
 use Symfony\UX\Disclose\Subject\SubjectResolverRegistry;
 use Twig\Environment;
+use Twig\TemplateWrapper;
 
 /**
  * Endpoint behind every disclosure: it enforces, in order, the context
@@ -44,7 +45,8 @@ final class DiscloseController
         private readonly DiscloseAuditLogger $auditLogger,
         private readonly EventDispatcherInterface $eventDispatcher,
         private readonly ?Environment $twig = null,
-    ) {}
+    ) {
+    }
 
     public function __invoke(Request $request): JsonResponse
     {
@@ -91,17 +93,25 @@ final class DiscloseController
         $this->eventDispatcher->dispatch(new DiscloseEvent($context, $subject, status: DiscloseStatus::Attempt), DiscloseEvent::ATTEMPT);
 
         $template = $context->get('template');
-        if (\is_string($template) && null !== $this->twig) {
+        $embeddedIndex = $context->get('embedded_index');
+        if (\is_string($template) && null !== $embeddedIndex && null !== $this->twig) {
+            // Inline "reveal" block mode: the revealed markup lives in the
+            // anonymous embedded module compiled from the component tag body.
+            // Reload it by its deterministic index and render the "reveal" block
+            // with the resolved subject. TemplateWrapper::renderBlock merges the
+            // environment globals (Template::renderBlock does not).
             $params = array_merge((array) $context->get('vars'), [
                 'subject' => $subject,
                 'context' => $context,
             ]);
 
-            if ($block = $context->get('block')) {
-                $revealed = $this->twig->load($template)->renderBlock($block, $params);
-            } else {
-                $revealed = $this->twig->render($template, $params);
-            }
+            $embedded = $this->twig->loadTemplate(
+                $this->twig->getTemplateClass($template),
+                $template,
+                (int) $embeddedIndex,
+            );
+            $revealed = new TemplateWrapper($this->twig, $embedded)
+                ->renderBlock('reveal', $params);
             $data = ['html' => $revealed];
         } else {
             $revealed = $discloser->disclose($subject, $context);

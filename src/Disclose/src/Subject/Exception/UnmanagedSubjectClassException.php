@@ -18,7 +18,5 @@ namespace Symfony\UX\Disclose\Subject\Exception;
  * resolvers is a configuration error.
  *
  * @author Jérôme Tamarelle <jerome@tamarelle.net>
- *
- * @internal
  */
 final class UnmanagedSubjectClassException extends \LogicException {}

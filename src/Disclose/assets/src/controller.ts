@@ -63,10 +63,19 @@ export default class extends Controller {
      */
     private originalButtonHtml: string | null = null;
 
+    /**
+     * The value target's initial markup (usually the masked placeholder),
+     * restored on hide so the masked state comes back instead of a blank slot.
+     */
+    private originalValueHtml: string | null = null;
+
     connect() {
         if (this.hasButtonTarget) {
             this.originalButtonHtml = this.buttonTarget.innerHTML;
             this.resetTrigger();
+        }
+        if (this.hasValueTarget) {
+            this.originalValueHtml = this.valueTarget.innerHTML;
         }
         this.clearError();
     }
@@ -155,7 +164,10 @@ export default class extends Controller {
 
     hide() {
         if (this.hasValueTarget) {
-            this.valueTarget.replaceChildren();
+            // Restore the masked placeholder (or the original, empty slot)
+            // instead of leaving the slot blank, so hiding returns to the
+            // exact pre-reveal state.
+            this.valueTarget.innerHTML = this.originalValueHtml ?? '';
         }
         if (this.hasContentTarget) {
             this.contentTarget.hidden = true;
